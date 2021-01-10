@@ -21,9 +21,10 @@
 #define SCREEN_WIDTH 128 // OLED display width,  in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define INVADERS_COUNT 10
-#define INVADERS_X_MOVE_COUNT 15
+#define INVADERS_X_MOVE_COUNT 15 // How many time invaders moves on X axis before going down
+#define TIME_PER_FRAME 32 // in ms
 
-Player p;
+Player* p = playerCreate();
 Invader* invaders [INVADERS_COUNT];
 
 void setup() {
@@ -71,17 +72,19 @@ void loop() {
   float startLoopTime = millis();  // Save time from last loop.
   //ssd1306_clearScreen( );
   char b[10];
-  p.update();
-  p.draw();
+  playerUpdate(p);
+  playerDraw(p);
 
   invade();
   
   // Fix 30 FPS
-  signed int timeToWait = 32 - (millis() - startLoopTime);
+  signed int timeToWait = TIME_PER_FRAME - (millis() - startLoopTime);
   if(timeToWait > 0) {
-    delay(32 - (millis() - startLoopTime));
+    delay(TIME_PER_FRAME - (millis() - startLoopTime));
   }
   debugDisplayInt(timeToWait, 0, 0);
-  //String(timeToWait).toCharArray(b,10); 
-  //ssd1306_printFixed (0,  8, b, STYLE_NORMAL);
+  uint_fast16_t padPinValue = analogRead(PIN_DPAD);
+  debugDisplayInt(padPinValue, 40, 0);
+  debugDisplayInt(digitalRead(PIN_BUTTON_A), 70, 0);
+
 }

@@ -4,58 +4,58 @@
 #include "input.h"
 #include "ssd1306.h"
 
-class Player {
+#define START_POS_X 64
+#define START_POS_Y 32
 
-  public:
-    float speed = 1; // in pixel per 16ms
-    float posX = 128/2;
-    float posY = 64/2;
-    SPRITE sprite;
-    
-    Player()
-    {
-      sprite = ssd1306_createSprite(posX, posY, sizeof(heartImage),  heartImage);
-    }
-  
-    void update(){
-      move();
-      shoot();
-    }
-  
-    void draw() { 
-      if(sprite.x != posX || sprite.y != posY) {
-        sprite.x = round(posX);
-        sprite.y = round(posY);
-        sprite.eraseTrace();
-        sprite.draw();
-      }
-    }
-  
-    void move() {
-      if (get_button_pressed(DPAD_RIGHT)) {
-        posX += speed;
-        note(1, 3);
-      } else if (get_button_pressed(DPAD_DOWN)) {
-        posY += speed;
-        note(2, 3);
-      } else if (get_button_pressed(DPAD_LEFT)) {
-        posX -= speed;
-        note(3, 3);
-      } else if (get_button_pressed(DPAD_UP)) {
-        posY -= speed;
-        note(4, 3);
-      }
-    }
-  
-    void shoot() {
-      speed = 1;
-      if (get_button_pressed(BUTTON_ACTION)) {
-        speed = 3;
-      }
-      if (get_button_pressed(BUTTON_B)) {
-        posX = 128/2;
-        posY = 64/2;
-      }
-    }
-};
+typedef struct Player {
+  uint_fast8_t speed = 1; // in pixel per frame
+  SPRITE sprite;
+} Player;
+
+Player* playerCreate() {
+  Player* player = malloc(sizeof(Player));
+  player->sprite = ssd1306_createSprite(START_POS_X, START_POS_Y, sizeof(heartImage),  heartImage);
+  player->speed = 1;
+  return player;
+}
+
+void playerDraw(Player *const p) { 
+  if(p->sprite.x != p->sprite.lx || p->sprite.y != p->sprite.ly) {
+    p->sprite.eraseTrace();
+    p->sprite.draw();
+  }
+}
+
+static void playerMove(Player *const p) {
+  if (getPadRightPressed()) {
+    p->sprite.x += p->speed;
+    note(1, 3);
+  } else if (getPadDownPressed()) {
+    p->sprite.y += p->speed;
+    note(2, 3);
+  } else if (getPadLeftPressed()) {
+    p->sprite.x -= p->speed;
+    note(3, 3);
+  } else if (getPadUpPressed()) {
+    p->sprite.y -= p->speed;
+    note(4, 3);
+  }
+}
+
+static void playerShoot(Player *const p) {
+  p->speed = 1;
+  if (getButtonAPressed()) {
+    p->speed = 3;
+  }
+  if (getButtonBPressed()) {
+    p->sprite.x = START_POS_X;
+    p->sprite.y = START_POS_Y;
+  }
+}
+
+void playerUpdate(Player *const player) {
+    playerMove(player);
+    playerShoot(player);
+}
+
 #endif
