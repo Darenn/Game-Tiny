@@ -34,16 +34,16 @@ class Player {
     void move() {
       if (get_button_pressed(DPAD_RIGHT)) {
         posX += speed;
-        note(1, 4);
+        note(1, 3);
       } else if (get_button_pressed(DPAD_DOWN)) {
         posY += speed;
-        note(2, 4);
+        note(2, 3);
       } else if (get_button_pressed(DPAD_LEFT)) {
         posX -= speed;
-        note(3, 4);
+        note(3, 3);
       } else if (get_button_pressed(DPAD_UP)) {
         posY -= speed;
-        note(4, 4);
+        note(4, 3);
       }
     }
   

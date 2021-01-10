@@ -2,7 +2,7 @@
 #define AUDIO_H
 
 #define PIN_BUZZER PB1
-const int Output = 1;                                   // Can be 1 or 4
+const int Output = PB1;                                   // Can be 1 or 4
 
 // Cater for 16MHz, 8MHz, or 1MHz clock:
 const int Clock = ((F_CPU/1000000UL) == 16) ? 4 : ((F_CPU/1000000UL) == 8) ? 3 : 0;

@@ -1,6 +1,8 @@
 #ifndef INPUTS_H
 #define INPUTS_H
 
+#include "debug.h"
+
 #define PIN_DPAD 7
 #define PIN_BUTTON_ACTION PB0
 #define DPAD_UP 0
@@ -21,17 +23,19 @@ void setup_inputs() {
 bool get_button_pressed(int button_id) {
   int keyVal = analogRead(PIN_DPAD);
   int actionVal = digitalRead(PIN_BUTTON_ACTION);
+  debugDisplayInt(keyVal, 40, 0);
+  debugDisplayInt(actionVal, 90, 0);
   switch(button_id) {
     case DPAD_RIGHT:
-      return keyVal >= 690 && keyVal <= 710;
+      return keyVal >= 660 && keyVal <= 760;
     case DPAD_DOWN:
-      return keyVal >= 480 && keyVal <= 530;
+      return keyVal >= 460 && keyVal <= 560;
     case DPAD_LEFT:
-      return keyVal >= 1 && keyVal <= 30;
+      return keyVal >= 4 && keyVal <= 30;
     case DPAD_UP:
-      return keyVal >= 850 && keyVal <= 980;
+      return keyVal >= 850 && keyVal <= 1020;
     case BUTTON_B:
-      return keyVal >= 1020 && keyVal <= 1030;
+      return keyVal >= 1022 && keyVal <= 1030;
     case BUTTON_ACTION:
       return actionVal == HIGH;
   }
