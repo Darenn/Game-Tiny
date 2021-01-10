@@ -3,12 +3,13 @@
 
 #include "input.h"
 #include "ssd1306.h"
+#include "bullet_pool.h"
 
 #define START_POS_X 64
-#define START_POS_Y 32
+#define START_POS_Y 0
 
 typedef struct Player {
-  uint_fast8_t speed = 1; // in pixel per frame
+  uint_fast8_t speed = 1; // in pixel per frame COULD BE OPTIMIZED IF NOT CHANGED DURING GAME
   SPRITE sprite;
 } Player;
 
@@ -45,7 +46,7 @@ static void playerMove(Player *const p) {
 static void playerShoot(Player *const p) {
   p->speed = 1;
   if (getButtonAPressed()) {
-    p->speed = 3;
+    bulletCreate(p->sprite.x + 3, p->sprite.y - 5);
   }
   if (getButtonBPressed()) {
     p->sprite.x = START_POS_X;

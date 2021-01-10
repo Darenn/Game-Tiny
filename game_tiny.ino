@@ -17,6 +17,7 @@
 #include "invader.h"
 #include "debug.h"
 #include "physics.h"
+#include "bullet_pool.h"
 
 #define SCREEN_WIDTH 128 // OLED display width,  in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -26,6 +27,7 @@
 
 Player* p = playerCreate();
 Invader* invaders [INVADERS_COUNT];
+
 
 void setup() {
   ssd1306_128x64_i2c_init();
@@ -38,6 +40,8 @@ void setup() {
      invaders[i] = new Invader(INVADER_0, 10 * i, 30);
      invaders[i]->draw();
   }
+
+  bulletPoolInit();
 }
 
 static void invade() {
@@ -76,6 +80,12 @@ void loop() {
   playerDraw(p);
 
   invade();
+
+  for(uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
+     if(isColliding(invaders[i]->sprite.getRect(), p->sprite.getRect())) {
+        debugDisplayInt(666, 0, 50);
+     }
+  }
   
   // Fix 30 FPS
   signed int timeToWait = TIME_PER_FRAME - (millis() - startLoopTime);
