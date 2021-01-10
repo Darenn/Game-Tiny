@@ -6,7 +6,7 @@
 #include "bullet_pool.h"
 
 #define START_POS_X 64
-#define START_POS_Y 0
+#define START_POS_Y 55
 
 typedef struct Player {
   uint_fast8_t speed = 1; // in pixel per frame COULD BE OPTIMIZED IF NOT CHANGED DURING GAME
@@ -27,18 +27,23 @@ void playerDraw(Player *const p) {
   }
 }
 
+void playerForceDraw(Player *const p) { 
+  p->sprite.eraseTrace();
+  p->sprite.draw();
+}
+
 static void playerMove(Player *const p) {
   if (getPadRightPressed()) {
     p->sprite.x += p->speed;
     note(1, 3);
   } else if (getPadDownPressed()) {
-    p->sprite.y += p->speed;
+    p->sprite.x -= p->speed;
     note(2, 3);
   } else if (getPadLeftPressed()) {
     p->sprite.x -= p->speed;
     note(3, 3);
   } else if (getPadUpPressed()) {
-    p->sprite.y -= p->speed;
+    p->sprite.x += p->speed;
     note(4, 3);
   }
 }
@@ -46,7 +51,7 @@ static void playerMove(Player *const p) {
 static void playerShoot(Player *const p) {
   p->speed = 1;
   if (getButtonAPressed()) {
-    bulletCreate(p->sprite.x + 3, p->sprite.y - 5);
+    //bulletCreate(p->sprite.x + 3, p->sprite.y - 5);
   }
   if (getButtonBPressed()) {
     p->sprite.x = START_POS_X;

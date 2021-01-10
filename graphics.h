@@ -17,11 +17,9 @@ const PROGMEM uint8_t heartImage[8] =
     0B00001110
 };
 
-const PROGMEM uint8_t shootSprite[3] =
+const PROGMEM uint8_t shootSprite[1] =
 {
-    0B11111111,
-    0B11111111,
-    0B11111111,
+    0B00111110,
 };
 
 const PROGMEM uint8_t playerBMP[7] =

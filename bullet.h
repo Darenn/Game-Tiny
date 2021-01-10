@@ -17,4 +17,9 @@ void bulletDraw(Bullet* b) {
   b->sprite.draw();
 }
 
+void kill(Bullet *bullet) {
+      bullet->enabled = false;
+      bullet->sprite.eraseTrace();
+    }
+
 #endif

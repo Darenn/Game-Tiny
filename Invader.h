@@ -17,11 +17,19 @@ class Invader {
       sprite = ssd1306_createSprite(posX, posY, sizeof(heartImage),  heartImage);
       sprite.x = posX;
       sprite.y = posY;
+      isDead = false;
     }
 
     void draw() {
+      if(!isDead) {
+        sprite.eraseTrace();
+        sprite.draw();
+      }
+    }
+
+    void kill() {
+      isDead = true;
       sprite.eraseTrace();
-      sprite.draw();
     }
 };
 

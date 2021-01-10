@@ -27,7 +27,7 @@
 
 Player* p = playerCreate();
 Invader* invaders [INVADERS_COUNT];
-
+Bullet theBullet;
 
 void setup() {
   ssd1306_128x64_i2c_init();
@@ -41,7 +41,12 @@ void setup() {
      invaders[i]->draw();
   }
 
-  bulletPoolInit();
+  theBullet.sprite = ssd1306_createSprite(0, 0, sizeof(shootSprite),  shootSprite);
+  theBullet.enabled = false;
+
+  playerForceDraw(p);
+
+ // bulletPoolInit();
 }
 
 static void invade() {
@@ -82,9 +87,21 @@ void loop() {
   invade();
 
   for(uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
-     if(isColliding(invaders[i]->sprite.getRect(), p->sprite.getRect())) {
-        debugDisplayInt(666, 0, 50);
+     if(!invaders[i].isDead && isColliding(invaders[i]->sprite.getRect(), theBullet.sprite.getRect())) {
+        kill(&theBullet);
+        invaders[i]->kill();
+        break;
      }
+  }
+
+  if (getButtonAPressed()) {
+    theBullet.enabled = true;
+    theBullet.sprite.x = p->sprite.x + 3;
+    theBullet.sprite.y = p->sprite.y - 5;
+  }
+  if(theBullet.enabled) {
+    bulletUpdate(&theBullet);
+    bulletDraw(&theBullet);
   }
   
   // Fix 30 FPS
