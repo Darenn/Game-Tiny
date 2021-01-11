@@ -17,11 +17,15 @@
 #include "invader.h"
 #include "debug.h"
 #include "physics.h"
-#include "bullet_pool.h"
+#include "bullet.h"
+
+
 
 #define SCREEN_WIDTH 128 // OLED display width,  in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
-#define INVADERS_COUNT 10
+#define INVADERS_COUNT_PER_ROW 3
+#define INVADERS_ROW_COUNT 5
+#define INVADERS_COUNT INVADERS_COUNT_PER_ROW * INVADERS_ROW_COUNT
 #define INVADERS_X_MOVE_COUNT 15 // How many time invaders moves on X axis before going down
 #define TIME_PER_FRAME 32 // in ms
 
@@ -33,21 +37,27 @@ void setup() {
   ssd1306_128x64_i2c_init();
   ssd1306_setFixedFont(ssd1306xled_font6x8);
 
-  pinMode(PIN_BUZZER, OUTPUT);
+  //pinMode(PIN_BUZZER, OUTPUT);
+  //setup_inputs();
+  DDRB |= 0b00011010;         // set PB1 as output (for the speaker), PB0 and PB2 as input
+  //sei();                      // enable all interrupts*/ //TODO more optimized than pinmode?
+    
   ssd1306_clearScreen( );
 
-  for(uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
-     invaders[i] = new Invader(INVADER_0, 10 * i, 30);
-     invaders[i]->draw();
-  }
+  for(uint_fast8_t y = 0; y < INVADERS_ROW_COUNT; ++y) {
+    for(uint_fast8_t x = 0; x < INVADERS_COUNT_PER_ROW; ++x) {
+       invaders[x + y * INVADERS_COUNT_PER_ROW] = new Invader(INVADER_0,10 * x, 10 * y);
+       invaders[x + y * INVADERS_COUNT_PER_ROW]->draw();
+    }
+  } 
 
   theBullet.sprite = ssd1306_createSprite(0, 0, sizeof(shootSprite),  shootSprite);
   theBullet.enabled = false;
 
   playerForceDraw(p);
-
- // bulletPoolInit();
 }
+
+uint_fast8_t invaderCounter = 0; // On each invade call we move only one row for performance
 
 static void invade() {
   static unsigned long invaderTimerInterval = 2000; // between each movement in milisecond
@@ -81,12 +91,10 @@ static void invade() {
 }
 
 void loop() {
+  float startLoopTime = millis();  // Save time to get 30 FPS
   note(0, 0);
-  float startLoopTime = millis();  // Save time from last loop.
-  //ssd1306_clearScreen( );
-  char b[10];
+  
   playerUpdate(p);
-  playerDraw(p);
 
   if(theBullet.enabled) {
     for(uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
@@ -96,28 +104,31 @@ void loop() {
         break;
      }
     }
+    bulletUpdate(&theBullet);
+    bulletDraw(&theBullet);
   }
 
-  invade();
+  //invade();
 
   if (getButtonAPressed()) {
     theBullet.enabled = true;
     theBullet.sprite.x = p->sprite.x + 3;
     theBullet.sprite.y = p->sprite.y - 5;
   }
-  if(theBullet.enabled) {
-    bulletUpdate(&theBullet);
-    bulletDraw(&theBullet);
-  }
+
+   playerDraw(p);
   
   // Fix 30 FPS
   signed int timeToWait = TIME_PER_FRAME - (millis() - startLoopTime);
   if(timeToWait > 0) {
-    delay(TIME_PER_FRAME - (millis() - startLoopTime));
+    delay(timeToWait);
   }
-  debugDisplayInt(timeToWait, 0, 0);
-  uint_fast16_t padPinValue = analogRead(PIN_DPAD);
-  debugDisplayInt(padPinValue, 40, 0);
-  debugDisplayInt(digitalRead(PIN_BUTTON_A), 70, 0);
+
+  // DEBUG
+  debugDisplayInt(freeMemory(), 0, 50);
+  //debugDisplayInt(timeToWait, 0, 0);
+  //uint_fast16_t padPinValue = analogRead(PIN_DPAD);
+  //debugDisplayInt(padPinValue, 40, 0);
+  //debugDisplayInt(digitalRead(PIN_BUTTON_A), 70, 0);
 
 }

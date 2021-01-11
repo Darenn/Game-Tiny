@@ -3,7 +3,6 @@
 
 #include "input.h"
 #include "ssd1306.h"
-#include "bullet_pool.h"
 
 #define START_POS_X 64
 #define START_POS_Y 55
