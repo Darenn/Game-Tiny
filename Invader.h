@@ -21,15 +21,13 @@ class Invader {
     }
 
     void draw() {
-      if(!isDead) {
-        sprite.eraseTrace();
-        sprite.draw();
-      }
+      sprite.eraseTrace();
+      sprite.draw();
     }
 
     void kill() {
       isDead = true;
-      sprite.eraseTrace();
+      sprite.erase();
     }
 };
 

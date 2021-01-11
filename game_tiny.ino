@@ -63,14 +63,18 @@ static void invade() {
       invaderDirection = -invaderDirection;
       invasionXmoveCounter = 0;
       for(uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
+        if(!invaders[i]->isDead) {
           invaders[i]->sprite.y += invaderYSpeed;
-          invaders[i]->draw(); 
+          invaders[i]->draw();
+        }
       }  
     } else {
       ++invasionXmoveCounter;
       for(uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
+        if(!invaders[i]->isDead) {
           invaders[i]->sprite.x += invaderXSpeed * invaderDirection;
           invaders[i]->draw(); 
+        }
       }  
     }
   }
@@ -84,15 +88,17 @@ void loop() {
   playerUpdate(p);
   playerDraw(p);
 
-  invade();
-
-  for(uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
-     if(!invaders[i].isDead && isColliding(invaders[i]->sprite.getRect(), theBullet.sprite.getRect())) {
+  if(theBullet.enabled) {
+    for(uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
+     if(!invaders[i]->isDead && isColliding(&theBullet.sprite,&invaders[i]->sprite)) {
         kill(&theBullet);
         invaders[i]->kill();
         break;
      }
+    }
   }
+
+  invade();
 
   if (getButtonAPressed()) {
     theBullet.enabled = true;
