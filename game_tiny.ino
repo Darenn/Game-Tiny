@@ -23,13 +23,14 @@
 
 #define SCREEN_WIDTH 128 // OLED display width,  in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
-#define INVADERS_COUNT_PER_ROW 10
+#define INVADERS_COUNT_PER_ROW 10 // TODO rename column
 #define INVADERS_ROW_COUNT 2
 #define INVADERS_COUNT INVADERS_COUNT_PER_ROW * INVADERS_ROW_COUNT
 #define TIME_PER_FRAME 32 // in ms
 #define INVADER_WIDTH 8
+#define STARTING_INVADER_X_MOVE_COUNT 15
 
-int invaderXMoveCount = 15; // How many time invaders moves on X axis before going down
+int invaderXMoveCount = STARTING_INVADER_X_MOVE_COUNT; // How many time invaders moves on X axis before going down
 
 Player* p = playerCreate();
 Invader invaders [INVADERS_COUNT];
@@ -62,7 +63,7 @@ void setup() {
 uint_fast8_t invaderCounter = 0; // On each invade call we move only one row for performance
 static signed int invaderDirection = 1; // 1 = right and -1 = left
 static uint_fast8_t nextInvaderXMoveCount = invaderXMoveCount;
-static uint_fast8_t invaderXSpeed = 2;
+static uint_fast8_t invaderXSpeed = 2; // TODO wont change should be define
 
 static void invade() {
   static unsigned long invaderTimerInterval = 100; // between each movement in milisecond
@@ -96,9 +97,69 @@ static void invade() {
   }
 }
 
-int getColumnWithIndex(int index) {
+
+int getColumnWithInvaderIndex(int index) {
   return index % INVADERS_COUNT_PER_ROW;
 }
+
+int getIndexByCoordinates(int row, int col) {
+  return col + row*INVADERS_COUNT_PER_ROW;
+}
+
+uint_fast8_t getFirstInvaderAliveCol() {
+  for(uint_fast8_t col = 0; col < INVADERS_COUNT_PER_ROW; ++col) {
+    for(uint_fast8_t row = 0; row < INVADERS_ROW_COUNT; ++row) {
+      if(!invaders[getIndexByCoordinates(row, col)].isDead) {
+        return col;
+      }
+    }
+  }
+  return 99;
+}
+
+uint_fast8_t getLastInvaderAliveCol() {
+  for(uint_fast8_t col = INVADERS_COUNT_PER_ROW-1; col > 0; --col) {
+    for(uint_fast8_t row = 0; row < INVADERS_ROW_COUNT; ++row) {
+      if(!invaders[getIndexByCoordinates(row, col)].isDead) {
+        return col;
+      }
+    }
+  }
+  return 99;
+}
+
+// TODO should compensate when killing an invader to be able to go father before dive
+void compensateDead() {
+  uint_fast8_t leftiestAliveColumn = getColumnWithInvaderIndex(getFirstInvaderAliveCol());
+  uint_fast8_t leftCompensation = leftiestAliveColumn*(INVADER_WIDTH/invaderXSpeed);
+  uint_fast8_t rightiestAliveColumn = getColumnWithInvaderIndex(getLastInvaderAliveCol());
+  uint_fast8_t rightCompensation = (INVADERS_COUNT_PER_ROW-1-rightiestAliveColumn)*(INVADER_WIDTH/invaderXSpeed);
+
+  static uint_fast8_t oldRightCompensation = 0;
+  static uint_fast8_t oldLeftCompensation = 0;
+
+  debugDisplayInt(leftCompensation, 40, 50);
+  debugDisplayInt(rightCompensation, 80, 50);
+  
+
+  // If we are moving in the direction, apply the new compensation
+  if(invaderDirection > 0) { // moving to right
+    invaderXMoveCount = STARTING_INVADER_X_MOVE_COUNT + rightCompensation - oldRightCompensation + oldLeftCompensation;
+    nextInvaderXMoveCount = invaderXMoveCount + leftCompensation - oldLeftCompensation;
+    
+  } else { // moving to left invaderDirection < 0
+    invaderXMoveCount = STARTING_INVADER_X_MOVE_COUNT + leftCompensation - oldLeftCompensation + oldRightCompensation;
+    nextInvaderXMoveCount = invaderXMoveCount + rightCompensation - oldRightCompensation;
+  }
+
+  delay(2000);
+
+ // nextInvaderXMoveCount = STARTING_INVADER_X_MOVE_COUNT + leftCompensation + rightCompensation; // adding the other compensation at next dive
+
+  oldRightCompensation = rightCompensation;
+  oldLeftCompensation = leftCompensation;
+}
+  
 
 
 
@@ -107,46 +168,14 @@ void loop() {
   note(0, 0);
 
   playerUpdate(p);
-
+  
   if (theBullet.enabled) {
     for (uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
       if (!invaders[i].isDead && isColliding(&theBullet.sprite, &invaders[i].sprite)) {
         kill(&theBullet);
         invaders[i].kill();
-        // TODO optimize by not making anything if survivor on same column AND do not double check de column
 
-        // Check if there is a survivor on the LEFT side or same column, move farther if not
-        bool shouldMoveFarther = true;
-        uint_fast8_t invaderColumn = i % INVADERS_COUNT_PER_ROW;
-        for (uint_fast8_t col = 0; col <= invaderColumn; ++col) {
-          for (i = 0; i < INVADERS_ROW_COUNT; ++i) {
-            if (!invaders[col + i*INVADERS_COUNT_PER_ROW].isDead) {
-              shouldMoveFarther = false;
-              break;
-            }
-          }
-        }
-        if (shouldMoveFarther) {
-          // If invaders are moving to the left we directly incr the xMoveCount, otherwise we will incr it next time there is a direction change.
-          nextInvaderXMoveCount += INVADER_WIDTH/invaderXSpeed;
-          if(invaderDirection < 0) invaderXMoveCount += INVADER_WIDTH/invaderXSpeed;
-        } else {
-          // Check if there is a survivor on the RIGHT side or same column, move farther if not
-          shouldMoveFarther = true;
-          for (int col = invaderColumn; col < INVADERS_COUNT_PER_ROW; ++col) {
-            for (i = 0; i < INVADERS_ROW_COUNT; ++i) {
-              if (!invaders[col + i * INVADERS_COUNT_PER_ROW].isDead) {
-                shouldMoveFarther = false;
-                break;
-              }
-            }
-          }
-          if (shouldMoveFarther) {
-            // If invaders are moving to the RIGHT we directly incr the xMoveCount, otherwise we will incr it next time there is a direction change.
-            nextInvaderXMoveCount += INVADER_WIDTH/invaderXSpeed;
-            if(invaderDirection > 0) invaderXMoveCount  += INVADER_WIDTH/invaderXSpeed;
-          }
-        }
+        compensateDead();
         break;
       }
     }
@@ -172,7 +201,6 @@ void loop() {
 
   // DEBUG
   debugDisplayInt(invaderXMoveCount, 0, 50);
-  debugDisplayInt(invaderDirection, 100, 50);
   //debugDisplayInt(freeMemory(), 0, 50);
   //debugDisplayInt(timeToWait, 0, 0);
   //uint_fast16_t padPinValue = analogRead(PIN_DPAD);
