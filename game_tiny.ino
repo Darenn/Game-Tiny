@@ -19,16 +19,16 @@
 #include "physics.h"
 #include "bullet.h"
 
-
+#define DEBUG
 
 #define SCREEN_WIDTH 128 // OLED display width,  in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
-#define INVADERS_COUNT_PER_ROW 10 // TODO rename column
-#define INVADERS_ROW_COUNT 2
+#define INVADERS_COUNT_PER_ROW 5 // TODO rename column
+#define INVADERS_ROW_COUNT 3
 #define INVADERS_COUNT INVADERS_COUNT_PER_ROW * INVADERS_ROW_COUNT
 #define TIME_PER_FRAME 32 // in ms
 #define INVADER_WIDTH 8
-#define STARTING_INVADER_X_MOVE_COUNT 15
+#define STARTING_INVADER_X_MOVE_COUNT 15 + 15
 
 int invaderXMoveCount = STARTING_INVADER_X_MOVE_COUNT; // How many time invaders moves on X axis before going down
 
@@ -66,7 +66,7 @@ static uint_fast8_t nextInvaderXMoveCount = invaderXMoveCount;
 static uint_fast8_t invaderXSpeed = 2; // TODO wont change should be define
 
 static void invade() {
-  static unsigned long invaderTimerInterval = 100; // between each movement in milisecond
+  static unsigned long invaderTimerInterval = 1000; // between each movement in milisecond
   static unsigned long lastInvaderMoveTime = 0;
   static uint_fast8_t invasionXmoveCounter = 0;
   
@@ -74,11 +74,12 @@ static void invade() {
   static uint_fast8_t invaderYSpeed = 3;
 
   if (millis() - lastInvaderMoveTime > invaderTimerInterval) {
-    lastInvaderMoveTime = millis();
-    if (invasionXmoveCounter >= invaderXMoveCount) {
+    lastInvaderMoveTime = millis();   
+    if (invasionXmoveCounter >= invaderXMoveCount) { // DIVE
+      compensateDead(true);
       invaderDirection = -invaderDirection;
       invasionXmoveCounter = 0;
-      invaderXMoveCount = nextInvaderXMoveCount;
+      //invaderXMoveCount = nextInvaderXMoveCount;
       for (uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
         if (!invaders[i].isDead) {
           invaders[i].sprite.y += invaderYSpeed;
@@ -95,6 +96,7 @@ static void invade() {
       }
     }
   }
+  debugDisplayInt(invasionXmoveCounter, 0, 80);
 }
 
 
@@ -128,8 +130,8 @@ uint_fast8_t getLastInvaderAliveCol() {
   return 99;
 }
 
-// TODO should compensate when killing an invader to be able to go father before dive
-void compensateDead() {
+// TODO two functions
+void compensateDead(bool isDiving) {
   uint_fast8_t leftiestAliveColumn = getColumnWithInvaderIndex(getFirstInvaderAliveCol());
   uint_fast8_t leftCompensation = leftiestAliveColumn*(INVADER_WIDTH/invaderXSpeed);
   uint_fast8_t rightiestAliveColumn = getColumnWithInvaderIndex(getLastInvaderAliveCol());
@@ -138,26 +140,46 @@ void compensateDead() {
   static uint_fast8_t oldRightCompensation = 0;
   static uint_fast8_t oldLeftCompensation = 0;
 
-  debugDisplayInt(leftCompensation, 40, 50);
-  debugDisplayInt(rightCompensation, 80, 50);
-  
+  debugDisplayInt(leftCompensation/4, 40, 50);
+  debugDisplayInt(rightCompensation/4, 80, 50);
 
-  // If we are moving in the direction, apply the new compensation
-  if(invaderDirection > 0) { // moving to right
-    invaderXMoveCount = STARTING_INVADER_X_MOVE_COUNT + rightCompensation - oldRightCompensation + oldLeftCompensation;
-    nextInvaderXMoveCount = invaderXMoveCount + leftCompensation - oldLeftCompensation;
-    
-  } else { // moving to left invaderDirection < 0
-    invaderXMoveCount = STARTING_INVADER_X_MOVE_COUNT + leftCompensation - oldLeftCompensation + oldRightCompensation;
-    nextInvaderXMoveCount = invaderXMoveCount + rightCompensation - oldRightCompensation;
+  if(isDiving) {
+    oldRightCompensation = rightCompensation;
+    oldLeftCompensation = leftCompensation;
+    invaderXMoveCount = STARTING_INVADER_X_MOVE_COUNT + rightCompensation + leftCompensation;
+    delay(1000);
+    return;
   }
 
-  delay(2000);
+  // If we are moving in the direction, apply the new compensation right now otherwise at next dive
+  if(invaderDirection > 0) { // moving to right
+    #ifdef DEBUG 
+      attinyAssert(oldRightCompensation<=rightCompensation, "!: oldRComp <= rComp");// Should never happen as you cannot revive aliens during game
+    #endif 
+    if(rightCompensation>oldRightCompensation) {
+        invaderXMoveCount = STARTING_INVADER_X_MOVE_COUNT + rightCompensation - oldRightCompensation + oldLeftCompensation;
+        delay(1000);
+    } /*else { // oldRightCompensation==rightCompensation
+        invaderXMoveCount = STARTING_INVADER_X_MOVE_COUNT + rightCompensation + oldLeftCompensation;
+    }*/
+    //nextInvaderXMoveCount = invaderXMoveCount + leftCompensation - oldLeftCompensation;
+    
+  } else { // invaderDirection < 0 // moving to left
+    #ifdef DEBUG 
+      attinyAssert(oldLeftCompensation<=leftCompensation, "!: oldLComp <= lComp"); // Should never happen as you cannot revive aliens during game
+    #endif 
+    if(leftCompensation>oldLeftCompensation) {
+        invaderXMoveCount = STARTING_INVADER_X_MOVE_COUNT + leftCompensation - oldLeftCompensation + oldRightCompensation;
+        delay(1000);
+    } /*else { // oldLeftCompensation==leftCompensation
+        invaderXMoveCount = STARTING_INVADER_X_MOVE_COUNT + leftCompensation + oldRightCompensation;
+    }*/
+    //nextInvaderXMoveCount = invaderXMoveCount + rightCompensation - oldRightCompensation;
+  }
+
+
 
  // nextInvaderXMoveCount = STARTING_INVADER_X_MOVE_COUNT + leftCompensation + rightCompensation; // adding the other compensation at next dive
-
-  oldRightCompensation = rightCompensation;
-  oldLeftCompensation = leftCompensation;
 }
   
 
@@ -175,7 +197,7 @@ void loop() {
         kill(&theBullet);
         invaders[i].kill();
 
-        compensateDead();
+        compensateDead(false);
         break;
       }
     }
@@ -194,15 +216,18 @@ void loop() {
   playerDraw(p);
 
   // Fix 30 FPS
-  signed int timeToWait = TIME_PER_FRAME - (millis() - startLoopTime);
-  if (timeToWait > 0) {
+  signed int timeToWait = (signed int)TIME_PER_FRAME - (millis() - startLoopTime);
+  if (timeToWait >= 0 && timeToWait < 33) {
     delay(timeToWait);
+  } else {
+    //delay (3000);
   }
 
   // DEBUG
   debugDisplayInt(invaderXMoveCount, 0, 50);
+  
   //debugDisplayInt(freeMemory(), 0, 50);
-  //debugDisplayInt(timeToWait, 0, 0);
+  debugDisplayInt(timeToWait, 55, 120);
   //uint_fast16_t padPinValue = analogRead(PIN_DPAD);
   //debugDisplayInt(padPinValue, 40, 0);
   //debugDisplayInt(digitalRead(PIN_BUTTON_A), 70, 0);

@@ -1,7 +1,7 @@
 #ifndef BULLET_H
 #define BULLET_H
 
-#define BULLET_SPEED 2
+#define BULLET_SPEED 3
 
 typedef struct Bullet {
   SPRITE sprite;

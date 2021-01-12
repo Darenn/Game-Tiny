@@ -15,6 +15,17 @@ void debugDisplayInt(signed int value, int xPosition, int yPosition) {
   ssd1306_printFixed (xPosition,  yPosition, tempStr, STYLE_NORMAL);
 }
 
+/*
+ * pause time in seconds
+ * string max size is around 20
+ */
+void attinyAssert(bool cond, char* string, int pauseTime = 3) {
+  if(!cond) {
+    ssd1306_printFixed (0, 0, string, STYLE_NORMAL);
+    delay(pauseTime * 1000);
+  }
+}
+
 // Function to see how much ram you still have
 
 #ifdef __arm__
