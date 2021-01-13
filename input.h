@@ -13,22 +13,22 @@ void setup_inputs() {
 
 bool getPadRightPressed() {
   uint_fast16_t padPinValue = analogRead(PIN_DPAD);
-  return padPinValue >= 660 && padPinValue <= 760; 
+  return padPinValue >= 660 && padPinValue <= 760;
 }
 
 bool getPadDownPressed() {
   uint_fast16_t padPinValue = analogRead(PIN_DPAD);
-  return padPinValue >= 460 && padPinValue <= 560; 
+  return padPinValue >= 460 && padPinValue <= 560;
 }
 
 bool getPadLeftPressed() {
   uint_fast16_t padPinValue = analogRead(PIN_DPAD);
-  return padPinValue >= 2 && padPinValue <= 30; 
+  return padPinValue >= 2 && padPinValue <= 30;
 }
 
 bool getPadUpPressed() {
   uint_fast16_t padPinValue = analogRead(PIN_DPAD);
-  return padPinValue >= 850 && padPinValue <= 1020; 
+  return padPinValue >= 850 && padPinValue <= 1020;
 }
 
 bool getButtonBPressed() {

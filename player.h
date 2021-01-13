@@ -19,14 +19,14 @@ Player* playerCreate() {
   return player;
 }
 
-void playerDraw(Player *const p) { 
-  if(p->sprite.x != p->sprite.lx || p->sprite.y != p->sprite.ly) {
+void playerDraw(Player *const p) {
+  if (p->sprite.x != p->sprite.lx || p->sprite.y != p->sprite.ly) {
     p->sprite.eraseTrace();
     p->sprite.draw();
   }
 }
 
-void playerForceDraw(Player *const p) { 
+void playerForceDraw(Player *const p) {
   p->sprite.eraseTrace();
   p->sprite.draw();
 }
@@ -59,8 +59,8 @@ static void playerShoot(Player *const p) {
 }
 
 void playerUpdate(Player *const player) {
-    playerMove(player);
-    playerShoot(player);
+  playerMove(player);
+  playerShoot(player);
 }
 
 #endif

@@ -18,8 +18,8 @@ void bulletDraw(Bullet* b) {
 }
 
 void kill(Bullet *bullet) {
-      bullet->enabled = false;
-      bullet->sprite.eraseTrace();
-    }
+  bullet->enabled = false;
+  bullet->sprite.eraseTrace();
+}
 
 #endif

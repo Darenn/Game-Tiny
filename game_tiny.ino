@@ -44,9 +44,9 @@ void setup() {
   ssd1306_clearScreen( );
 
   for (uint_fast8_t y = 0; y < INVADERS_ROW_COUNT; ++y) {
-    for (uint_fast8_t x = 0; x < INVADERS_COUNT_PER_ROW; ++x) {
-      invaders[x + y * INVADERS_COUNT_PER_ROW] = Invader(INVADER_0, 10 * x, 10 * y);
-      drawInvader(&invaders[x + y * INVADERS_COUNT_PER_ROW], x + y * INVADERS_COUNT_PER_ROW , 0, 0);
+    for (uint_fast8_t x = 0; x < INVADERS_COLUMN_COUNT; ++x) {
+      invaders[x + y * INVADERS_COLUMN_COUNT] = Invader(INVADER_0, 10 * x, 10 * y);
+      drawInvader(&invaders[x + y * INVADERS_COLUMN_COUNT], x + y * INVADERS_COLUMN_COUNT , 0, 0);
     }
   }
 
@@ -55,10 +55,6 @@ void setup() {
 
   playerForceDraw(p);
 }
-
-
-
-
 
 void loop() {
   float startLoopTime = millis();  // Save time to get 30 FPS
@@ -89,6 +85,7 @@ void loop() {
   }
 
   playerDraw(p);
+  //drawInvaders();
 
   // Fix 30 FPS
   signed int timeToWait = (signed int)TIME_PER_FRAME - (millis() - startLoopTime);

@@ -1,26 +1,26 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#include "ssd1306.h" 
+#include "ssd1306.h"
 
 
 /*void DebugUtoa(uint16_t b)
-{
+  {
     utoa(b,tempStr,10);
-}*/
+  }*/
 
 void debugDisplayInt(signed int value, int xPosition, int yPosition) {
   char tempStr[4] = {0};
-  utoa(value,tempStr,10);
+  utoa(value, tempStr, 10);
   ssd1306_printFixed (xPosition,  yPosition, tempStr, STYLE_NORMAL);
 }
 
 /*
- * pause time in seconds
- * string max size is around 20
- */
+   pause time in seconds
+   string max size is around 20
+*/
 void attinyAssert(bool cond, char* string, int pauseTime = 3) {
-  if(!cond) {
+  if (!cond) {
     ssd1306_printFixed (0, 0, string, STYLE_NORMAL);
     delay(pauseTime * 1000);
   }
@@ -34,7 +34,7 @@ extern "C" char* sbrk(int incr);
 #else  // __ARM__
 extern char *__brkval;
 #endif  // __arm__
- 
+
 int freeMemory() {
   char top;
 #ifdef __arm__
