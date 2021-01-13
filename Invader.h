@@ -13,6 +13,7 @@
 #define INVADER_DIVE_MOVE_DIST 2
 #define INVADERS_COUNT_PER_ROW 5 // TODO rename column
 #define STARTING_INVADER_X_MOVE_COUNT 15 + 15
+#define INVADER_STARTING_X_POSITION 0
 #define INVADERS_ROW_COUNT 3
 #define INVADERS_COUNT INVADERS_COUNT_PER_ROW * INVADERS_ROW_COUNT
 #define INVADER_WIDTH 8
@@ -55,7 +56,8 @@ int getIndexByCoordinates(int row, int col) {
   return col + row * INVADERS_COUNT_PER_ROW;
 }
 
-int invaderXMoveCount = STARTING_INVADER_X_MOVE_COUNT; // How many time invaders moves on X axis before going down
+int invaderRightXMoveCount = STARTING_INVADER_X_MOVE_COUNT; // How many time invaders moves on X axis before going down
+int invaderLeftXMoveCount = 0; // How many time invaders moves on X axis before going down
 
 int getColumnWithInvaderIndex(int index) {
   return index % INVADERS_COUNT_PER_ROW;
@@ -101,7 +103,8 @@ void compensateDead(bool isDiving) {
   if (isDiving) {
     oldRightCompensation = rightCompensation;
     oldLeftCompensation = leftCompensation;
-    invaderXMoveCount = STARTING_INVADER_X_MOVE_COUNT + rightCompensation + leftCompensation;
+    invaderRightXMoveCount = STARTING_INVADER_X_MOVE_COUNT + rightCompensation;
+    invaderLeftXMoveCount = INVADER_STARTING_X_POSITION - leftCompensation;
     return;
   }
 
@@ -111,7 +114,7 @@ void compensateDead(bool isDiving) {
     attinyAssert(oldRightCompensation <= rightCompensation, "!: oldRComp <= rComp"); // Should never happen as you cannot revive aliens during game
 #endif
     if (rightCompensation > oldRightCompensation) {
-      invaderXMoveCount = STARTING_INVADER_X_MOVE_COUNT + rightCompensation - oldRightCompensation + oldLeftCompensation;
+      invaderRightXMoveCount = STARTING_INVADER_X_MOVE_COUNT + rightCompensation - oldRightCompensation; //+ oldLeftCompensation;
     }
 
   } else { // invaderDirection < 0 // moving to left
@@ -119,21 +122,23 @@ void compensateDead(bool isDiving) {
     attinyAssert(oldLeftCompensation <= leftCompensation, "!: oldLComp <= lComp"); // Should never happen as you cannot revive aliens during game
 #endif
     if (leftCompensation > oldLeftCompensation) {
-      invaderXMoveCount = STARTING_INVADER_X_MOVE_COUNT + leftCompensation - oldLeftCompensation + oldRightCompensation;
+      invaderLeftXMoveCount = STARTING_INVADER_X_MOVE_COUNT + leftCompensation - oldLeftCompensation; //+ oldRightCompensation;
     }
   }
 }
 
 uint_fast8_t invaderCounter = 0; // TODO On each invade call we move only one row for performance
 
-static uint_fast8_t nextInvaderXMoveCount = invaderXMoveCount;
+static uint_fast8_t nextinvaderRightXMoveCount = invaderRightXMoveCount;
 
 
 int getPosX(uint_fast8_t idx, uint_fast8_t strafeCounter, uint_fast8_t diveCounter) {
 
   static uint_fast8_t oldRightStrafeCounter = 0;
   int posXStart = getColumnWithInvaderIndex(idx) * XSPACE_BETWEEN_INVADERS;
-  int offsetXStrafeRight = strafeCounter * INVADER_STRAFE_MOVE_DIST;
+  int offsetXStrafe =  strafeCounter * INVADER_STRAFE_MOVE_DIST;
+  return posXStart + offsetXStrafe;
+ /* int offsetXStrafeRight = strafeCounter * INVADER_STRAFE_MOVE_DIST;
   int offsetXStrafeLeft = oldRightStrafeCounter*INVADER_STRAFE_MOVE_DIST - strafeCounter*INVADER_STRAFE_MOVE_DIST;
 
   if(diveCounter % 2 == 0) { // if we are moving to right
@@ -141,7 +146,7 @@ int getPosX(uint_fast8_t idx, uint_fast8_t strafeCounter, uint_fast8_t diveCount
     return posXStart + offsetXStrafeRight;
   } else {
     return posXStart + offsetXStrafeLeft;
-  }
+  }*/
   
   /*
   uint_fast8_t leftiestAliveColumn = getColumnWithInvaderIndex(getFirstInvaderAliveCol());
@@ -175,8 +180,8 @@ int getPosY(uint_fast8_t idx, uint_fast8_t diveCounter) {
 }
 
 void drawInvader(Invader* i, int index, int strafeCounter, int diveCounter) {
-      //i->sprite.x = getPosX(index, strafeCounter, diveCounter);
-      //i->sprite.y = getPosY(index, diveCounter);
+      i->sprite.x = getPosX(index, strafeCounter, diveCounter);
+      i->sprite.y = getPosY(index, diveCounter);
       i->sprite.eraseTrace();
       i->sprite.draw();
       //ssd1306_drawSpriteEx(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(heartImage),  heartImage); //!!!!! y is in blocks vertical position in blocks (pixels/8)
@@ -185,7 +190,7 @@ void drawInvader(Invader* i, int index, int strafeCounter, int diveCounter) {
 static void invade() { // TODO should let the draw to somehting else
   static unsigned long invaderTimerInterval = 500; // between each movement in milisecond
   static unsigned long lastInvaderMoveTime = 0;
-  static uint_fast8_t invasionXmoveCounter = 0; // TODO rename STRAFE_COUNTER
+  static signed int invasionXmoveCounter = 0; // TODO rename STRAFE_COUNTER
   static uint_fast8_t diveCounter = 0;
 
 
@@ -193,12 +198,13 @@ static void invade() { // TODO should let the draw to somehting else
 
   if (millis() - lastInvaderMoveTime > invaderTimerInterval) {
     lastInvaderMoveTime = millis();
-    if (invasionXmoveCounter >= invaderXMoveCount) { // DIVE
+    bool arrivedOnRight = invaderDirection == 1 && invasionXmoveCounter >= invaderRightXMoveCount;
+    bool arrivedOnLeft = invaderDirection == -1 && invasionXmoveCounter <= invaderLeftXMoveCount;
+    if (arrivedOnRight  || arrivedOnLeft) { // DIVE
       ++diveCounter;
       compensateDead(true);
       invaderDirection = -invaderDirection;
-      invasionXmoveCounter = 0;
-      //invaderXMoveCount = nextInvaderXMoveCount;
+      //invaderRightXMoveCount = nextinvaderRightXMoveCount;
       for (uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
         if (!invaders[i].isDead) {
           invaders[i].sprite.y += invaderYSpeed;
@@ -206,7 +212,11 @@ static void invade() { // TODO should let the draw to somehting else
         }
       }
     } else {
-      ++invasionXmoveCounter;
+      if(invaderDirection == -1) {
+        --invasionXmoveCounter;
+      } else {
+        ++invasionXmoveCounter;
+      }     
       for (uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
         if (!invaders[i].isDead) {
           invaders[i].sprite.x += invaderXSpeed * invaderDirection;
@@ -216,6 +226,8 @@ static void invade() { // TODO should let the draw to somehting else
     }
   }
   debugDisplayInt(invasionXmoveCounter, 0, 80);
+  debugDisplayInt(invaderRightXMoveCount, 0, 30);
+  debugDisplayInt(invaderLeftXMoveCount, 0, 40);
 }
 
 
