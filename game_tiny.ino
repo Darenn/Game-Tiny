@@ -27,8 +27,6 @@
 
 #define TIME_PER_FRAME 32 // in ms
 
-
-
 Player* p = playerCreate();
 Bullet theBullet;
 
@@ -45,7 +43,7 @@ void setup() {
 
   for (uint_fast8_t y = 0; y < INVADERS_ROW_COUNT; ++y) {
     for (uint_fast8_t x = 0; x < INVADERS_COLUMN_COUNT; ++x) {
-      invaders[x + y * INVADERS_COLUMN_COUNT] = Invader(INVADER_0, 10 * x, 10 * y);
+      invaders[x + y * INVADERS_COLUMN_COUNT] = Invader();
       drawInvader(&invaders[x + y * INVADERS_COLUMN_COUNT], x + y * INVADERS_COLUMN_COUNT , 0, 0);
     }
   }
@@ -58,15 +56,21 @@ void setup() {
 
 void loop() {
   float startLoopTime = millis();  // Save time to get 30 FPS
+  //ssd1306_clearScreen();
+
+  //ssd1306_setColor(RGB_COLOR8(0, 0, 0));
+  //ssd1306_fillRect(0, 0, 128, 64);
+  
   note(0, 0);
+  
 
   playerUpdate(p);
 
-  if (theBullet.enabled) {
+  /*if (theBullet.enabled) {
     for (uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
       if (!invaders[i].isDead && isColliding(&theBullet.sprite, &invaders[i].sprite)) {
         kill(&theBullet);
-        invaders[i].kill();
+        killInvader(&invaders[i], i);
 
         compensateDead();
         break;
@@ -74,7 +78,7 @@ void loop() {
     }
     bulletUpdate(&theBullet);
     bulletDraw(&theBullet);
-  }
+  }*/
 
   invade();
 
@@ -84,9 +88,8 @@ void loop() {
     theBullet.sprite.y = p->sprite.y - 5;
   }
 
-  playerDraw(p);
-  //drawInvaders();
 
+  
   // Fix 30 FPS
   signed int timeToWait = (signed int)TIME_PER_FRAME - (millis() - startLoopTime);
   if (timeToWait >= 0 && timeToWait < 33) {
@@ -95,9 +98,11 @@ void loop() {
     //delay (3000);
   }
 
+  playerDraw(p);
+  //drawInvaders();
   // DEBUG
   //debugDisplayInt(invaderXMoveCount, 0, 50);
-
+  //debugDisplayInt(sizeof(Invader), 0, 50);
   //debugDisplayInt(freeMemory(), 0, 50);
   //debugDisplayInt(timeToWait, 55, 120);
   //uint_fast16_t padPinValue = analogRead(PIN_DPAD);
