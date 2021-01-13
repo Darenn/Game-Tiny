@@ -90,14 +90,14 @@ uint_fast8_t getLastInvaderAliveCol() {
   return 99;
 }
 
-// TODO two functions
-void compensateDead(bool isDiving) {
-  uint_fast8_t leftiestAliveColumn = getColumnWithInvaderIndex(getFirstInvaderAliveCol());
-  uint_fast8_t leftCompensation = leftiestAliveColumn * (INVADER_WIDTH / invaderXSpeed);
-  uint_fast8_t rightiestAliveColumn = getColumnWithInvaderIndex(getLastInvaderAliveCol());
-  uint_fast8_t rightCompensation = (INVADERS_COUNT_PER_ROW - 1 - rightiestAliveColumn) * (INVADER_WIDTH / invaderXSpeed);
-  invaderRightXMoveCount = STARTING_INVADER_X_MOVE_COUNT + rightCompensation;
-  invaderLeftXMoveCount = INVADER_STARTING_X_POSITION - leftCompensation;
+void compensateDead() {
+  #define s_leftiestAliveColumn getColumnWithInvaderIndex(getFirstInvaderAliveCol())
+  #define s_leftCompensation s_leftiestAliveColumn * (INVADER_WIDTH / invaderXSpeed)
+  #define s_rightiestAliveColumn getColumnWithInvaderIndex(getLastInvaderAliveCol())
+  #define s_rightCompensation (INVADERS_COUNT_PER_ROW - 1 - s_rightiestAliveColumn) * (INVADER_WIDTH / invaderXSpeed)
+
+  invaderRightXMoveCount = STARTING_INVADER_X_MOVE_COUNT + s_rightCompensation;
+  invaderLeftXMoveCount = INVADER_STARTING_X_POSITION - s_leftCompensation;
 }
 
 uint_fast8_t invaderCounter = 0; // TODO On each invade call we move only one row for performance
@@ -136,7 +136,7 @@ static void invade() { // TODO should let the draw to somehting else
     bool arrivedOnLeft = invaderDirection == -1 && invasionXmoveCounter <= invaderLeftXMoveCount;
     if (arrivedOnRight  || arrivedOnLeft) { // DIVE
       ++diveCounter;
-      compensateDead(true);
+      //compensateDead();
       invaderDirection = -invaderDirection;
       for (uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
         if (!invaders[i].isDead) {

@@ -72,7 +72,7 @@ void loop() {
         kill(&theBullet);
         invaders[i].kill();
 
-        compensateDead(false);
+        compensateDead();
         break;
       }
     }
