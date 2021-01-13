@@ -20,6 +20,10 @@
 
 uint_fast8_t invaderXSpeed = 2; // TODO wont change should be define
 signed int invaderDirection = 1; // 1 = right and -1 = left
+int invaderRightXMoveLimit = STARTING_INVADER_X_MOVE_COUNT; // How many time invaders moves on X axis before going down
+int invaderLeftXMoveLimit = 0; // How many time invaders moves on X axis before going down
+uint_fast8_t invaderCounter = 0; // TODO On each invade call we move only one row for performance
+static uint_fast8_t nextinvaderRightXMoveLimit = invaderRightXMoveLimit;
 
 class Invader {
 
@@ -51,13 +55,10 @@ class Invader {
 
 Invader invaders [INVADERS_COUNT];
 
-
 int getIndexByCoordinates(int row, int col) {
   return col + row * INVADERS_COUNT_PER_ROW;
 }
 
-int invaderRightXMoveCount = STARTING_INVADER_X_MOVE_COUNT; // How many time invaders moves on X axis before going down
-int invaderLeftXMoveCount = 0; // How many time invaders moves on X axis before going down
 
 int getColumnWithInvaderIndex(int index) {
   return index % INVADERS_COUNT_PER_ROW;
@@ -66,7 +67,6 @@ int getColumnWithInvaderIndex(int index) {
 int getRowWithInvaderIndex(int index) {
   return index / INVADERS_COUNT_PER_ROW;
 }
-
 
 uint_fast8_t getFirstInvaderAliveCol() {
   for (uint_fast8_t col = 0; col < INVADERS_COUNT_PER_ROW; ++col) {
@@ -90,20 +90,19 @@ uint_fast8_t getLastInvaderAliveCol() {
   return 99;
 }
 
+/*
+ * Find the most to the right alien alive to calculate how much more we should move to the right (and same with the left).
+ * Then change both X move limits for right and left.
+ */
 void compensateDead() {
+  #define s_speedXRation INVADER_WIDTH / invaderXSpeed
   #define s_leftiestAliveColumn getColumnWithInvaderIndex(getFirstInvaderAliveCol())
-  #define s_leftCompensation s_leftiestAliveColumn * (INVADER_WIDTH / invaderXSpeed)
+  #define s_leftCompensation s_leftiestAliveColumn * s_speedXRation
   #define s_rightiestAliveColumn getColumnWithInvaderIndex(getLastInvaderAliveCol())
-  #define s_rightCompensation (INVADERS_COUNT_PER_ROW - 1 - s_rightiestAliveColumn) * (INVADER_WIDTH / invaderXSpeed)
-
-  invaderRightXMoveCount = STARTING_INVADER_X_MOVE_COUNT + s_rightCompensation;
-  invaderLeftXMoveCount = INVADER_STARTING_X_POSITION - s_leftCompensation;
+  #define s_rightCompensation (INVADERS_COUNT_PER_ROW - 1 - s_rightiestAliveColumn) * s_speedXRation
+  invaderRightXMoveLimit = STARTING_INVADER_X_MOVE_COUNT + s_rightCompensation;
+  invaderLeftXMoveLimit = INVADER_STARTING_X_POSITION - s_leftCompensation;
 }
-
-uint_fast8_t invaderCounter = 0; // TODO On each invade call we move only one row for performance
-
-static uint_fast8_t nextinvaderRightXMoveCount = invaderRightXMoveCount;
-
 
 int getPosX(uint_fast8_t idx, uint_fast8_t strafeCounter, uint_fast8_t diveCounter) {
   int posXStart = getColumnWithInvaderIndex(idx) * XSPACE_BETWEEN_INVADERS;
@@ -132,8 +131,8 @@ static void invade() { // TODO should let the draw to somehting else
 
   if (millis() - lastInvaderMoveTime > invaderTimerInterval) {
     lastInvaderMoveTime = millis();
-    bool arrivedOnRight = invaderDirection == 1 && invasionXmoveCounter >= invaderRightXMoveCount;
-    bool arrivedOnLeft = invaderDirection == -1 && invasionXmoveCounter <= invaderLeftXMoveCount;
+    bool arrivedOnRight = invaderDirection == 1 && invasionXmoveCounter >= invaderRightXMoveLimit;
+    bool arrivedOnLeft = invaderDirection == -1 && invasionXmoveCounter <= invaderLeftXMoveLimit;
     if (arrivedOnRight  || arrivedOnLeft) { // DIVE
       ++diveCounter;
       //compensateDead();
