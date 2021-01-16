@@ -19,6 +19,8 @@
 #define INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT 15 // How much time invaders will strafe to the right at start.
 #define INVADER_STARTING_LEFT_STRAFE_COUNT_LIMIT 0 // How much time invaders will strafe to the left at start.
 
+#define INVADER_SPRITE invader
+
 #define X_SPEED_RATIO INVADER_WIDTH / INVADER_STRAFE_SPEED // how much strafe move to replace an invader
 #define LEFTIEST_ALIVE_COLUMN getColumnWithInvaderIndex(getFirstColumnWithAliveInvader())
 #define LEFT_COMPENSATION LEFTIEST_ALIVE_COLUMN * X_SPEED_RATIO
@@ -110,7 +112,7 @@ void drawInvader(Invader* i, uint_fast8_t index, uint_fast8_t strafeCounter, uin
   i->sprite.y = y;
   i->sprite.eraseTrace();
   i->sprite.draw();*/
-  ssd1306_drawSpriteEx(x, y/8, sizeof(heartImage),  heartImage); //!!!!! y is in blocks vertical position in blocks (pixels/8) // code without sprite
+  ssd1306_drawSpriteEx(x, y/8, sizeof(INVADER_SPRITE),  INVADER_SPRITE); //!!!!! y is in blocks vertical position in blocks (pixels/8) // code without sprite
 }
 
 

@@ -14,7 +14,7 @@ typedef struct Player {
 
 Player* playerCreate() {
   Player* player = malloc(sizeof(Player));
-  player->sprite = ssd1306_createSprite(START_POS_X, START_POS_Y, sizeof(heartImage),  heartImage);
+  player->sprite = ssd1306_createSprite(START_POS_X, START_POS_Y, sizeof(playerBMP),  playerBMP);
   player->speed = 1;
   return player;
 }

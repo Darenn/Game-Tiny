@@ -17,6 +17,16 @@ const PROGMEM uint8_t heartImage[8] =
   0B00001110
 };
 
+const PROGMEM uint8_t invader [] = {
+  0B01010000,
+  0B00111000,
+  0B00010100,
+  0B00111100,
+  0B00010100,
+  0B00111000,
+  0B01010000,
+};
+
 const PROGMEM uint8_t shootSprite[3] =
 {
   0B00111110,
@@ -26,13 +36,13 @@ const PROGMEM uint8_t shootSprite[3] =
 
 const PROGMEM uint8_t playerBMP[7] =
 {
-  0B11111000,
-  0B11111000,
-  0B11111111,
-  0B11111111,
-  0B11111111,
-  0B11111000,
-  0B11111000
+  0B01111000,
+  0B01111000,
+  0B01111111,
+  0B01111111,
+  0B01111111,
+  0B01111000,
+  0B01111000
 };
 
 const PROGMEM uint8_t invader1[7] =

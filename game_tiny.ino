@@ -22,7 +22,6 @@
 #define SCREEN_WIDTH 128 // OLED display width,  in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
-
 #define TIME_PER_FRAME 32 // in ms
 
 Player* p = playerCreate();
@@ -71,7 +70,6 @@ void loop() {
       if (!invaders[i].isDead && isColliding(getBulletRect(&theBullet), getInvaderRect(x, y))) {
         kill(&theBullet);
         killInvader(&invaders[i], i);
-
         compensateDead();
         break;
       }
@@ -93,18 +91,18 @@ void loop() {
   // Fix 30 FPS
   signed int timeToWait = (signed int)TIME_PER_FRAME - (millis() - startLoopTime);
   if (timeToWait >= 0 && timeToWait < 33) {
+    debugDisplayInt(timeToWait, 55, 120);
     delay(timeToWait);
   } else {
     //delay (3000);
   }
-
 
   //drawInvaders();
   // DEBUG
   //debugDisplayInt(invaderXMoveCount, 0, 50);
   //debugDisplayInt(sizeof(Invader), 0, 50);
   //debugDisplayInt(freeMemory(), 0, 50);
-  //debugDisplayInt(timeToWait, 55, 120);
+  
   //uint_fast16_t padPinValue = analogRead(PIN_DPAD);
   //debugDisplayInt(padPinValue, 40, 0);
   //debugDisplayInt(digitalRead(PIN_BUTTON_A), 70, 0);
