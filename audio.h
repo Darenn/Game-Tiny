@@ -16,4 +16,28 @@ void note (int n, int octave) {
   GTCCR = (Output == 4) << COM1B0;
   TCCR1 = 1 << CTC1 | (Output == 1) << COM1A0 | prescaler << CS10;
 }
+
+void beep(int bCount,int bDelay)
+{
+    for (int i = bCount*2; i>0; i--)
+    {
+        digitalWrite(PIN_BUZZER, i & 1);
+        for(int i2 = 0; i2 < bDelay; i2++)
+        {
+            __asm__("nop\n\t");
+#if F_CPU > 8000000
+            __asm__("nop\n\t");
+            __asm__("nop\n\t");
+            __asm__("nop\n\t");
+            __asm__("nop\n\t");
+            __asm__("nop\n\t");
+            __asm__("nop\n\t");
+            __asm__("nop\n\t");
+            __asm__("nop\n\t");
+#endif
+        }
+    }
+    digitalWrite(PIN_BUZZER,LOW);
+}
+
 #endif

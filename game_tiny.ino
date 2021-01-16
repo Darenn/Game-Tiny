@@ -38,6 +38,23 @@ void setup() {
 
   ssd1306_clearScreen( );
 
+  delay(500);
+
+  for (int8_t y=-24; y<16; y++)
+  {
+        gfx_drawMonoBitmap(16, y, 40, 32, gameTinyLogo);
+        delay(25);
+  }
+  ssd1306_printFixed_oldStyle(60, 29, "SPACE", STYLE_NORMAL);
+  ssd1306_printFixed_oldStyle(65, 32, "INVADERS", STYLE_NORMAL);
+  beep(200,600);
+  beep(300,200);
+  beep(400,300);
+  
+  delay(2000);
+
+  ssd1306_clearScreen( );
+
   for (uint_fast8_t y = 0; y < INVADERS_ROW_COUNT; ++y) {
     for (uint_fast8_t x = 0; x < INVADERS_COLUMN_COUNT; ++x) {
       invaders[x + y * INVADERS_COLUMN_COUNT] = Invader();
@@ -71,11 +88,14 @@ void loop() {
         kill(&theBullet);
         killInvader(&invaders[i], i);
         compensateDead();
+        drawInvaders();
         break;
       }
     }
-    bulletUpdate(&theBullet);
-    bulletDraw(&theBullet);
+    if (theBullet.enabled) {
+      bulletUpdate(&theBullet);
+      bulletDraw(&theBullet);
+    }
   }
 
   invade();
@@ -91,7 +111,7 @@ void loop() {
   // Fix 30 FPS
   signed int timeToWait = (signed int)TIME_PER_FRAME - (millis() - startLoopTime);
   if (timeToWait >= 0 && timeToWait < 33) {
-    debugDisplayInt(timeToWait, 55, 120);
+    debugDisplayInt(timeToWait, 50, 0);
     delay(timeToWait);
   } else {
     //delay (3000);
