@@ -22,4 +22,9 @@ void kill(Bullet *bullet) {
   bullet->sprite.eraseTrace();
 }
 
+// TODO optimized using only one get rect function?
+Rect getBulletRect(Bullet *b) {
+  return Rect{b->sprite.x, b->sprite.y, b->sprite.x + 8, b->sprite.y + 8};
+}
+
 #endif

@@ -1,12 +1,10 @@
 /**
      Attiny85 PINS
-               ____
-     RESET   -|_|  |- 3V
-     SCL (3) -|    |- (2)
-     SDA (4) -|    |- (1) HP
-     GND     -|____|- (0) INPUT
-
-     Atmega328 PINS: connect LCD to A4/A5
+                    ____
+     RESET(PB5)   -|_|  |- 3V
+     SCL (PB3)    -|    |- (PB2)
+     SDA (PB4)    -|    |- (PB1) HP
+     GND          -|____|- (PB0) INPUT
 */
 
 #include "ssd1306.h"
@@ -66,9 +64,11 @@ void loop() {
 
   playerUpdate(p);
 
-  /*if (theBullet.enabled) {
+  if (theBullet.enabled) {
     for (uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
-      if (!invaders[i].isDead && isColliding(&theBullet.sprite, &invaders[i].sprite)) {
+      uint_fast8_t x = getPosX(i);
+      uint_fast8_t y = getPosY(i);   
+      if (!invaders[i].isDead && isColliding(getBulletRect(&theBullet), getInvaderRect(x, y))) {
         kill(&theBullet);
         killInvader(&invaders[i], i);
 
@@ -78,7 +78,7 @@ void loop() {
     }
     bulletUpdate(&theBullet);
     bulletDraw(&theBullet);
-  }*/
+  }
 
   invade();
 
@@ -88,7 +88,7 @@ void loop() {
     theBullet.sprite.y = p->sprite.y - 5;
   }
 
-
+    playerDraw(p);
   
   // Fix 30 FPS
   signed int timeToWait = (signed int)TIME_PER_FRAME - (millis() - startLoopTime);
@@ -98,7 +98,7 @@ void loop() {
     //delay (3000);
   }
 
-  playerDraw(p);
+
   //drawInvaders();
   // DEBUG
   //debugDisplayInt(invaderXMoveCount, 0, 50);

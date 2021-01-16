@@ -2,6 +2,7 @@
 #define INVADER_H
 
 #include "ssd1306.h"
+#include "physics.h"
 
 #define INVADER_0 0
 #define INVADER_1 1
@@ -9,14 +10,20 @@
 
 #define INVADER_WIDTH 8 // The width of an invader in pixels
 #define INVADER_X_GAP 10 // The gap between each invader on the same row
-#define INVADER_Y_GAP 10 // The gap between two rows
+#define INVADER_Y_GAP 8 // The gap between two rows
 #define INVADER_STRAFE_SPEED 2 // in pixel per strafe, how much pixels we go on the X axis at each strafe
 #define INVADER_DIVE_SPEED 8 // In pixel per dive, how much pixels we go down at each dive
-#define INVADERS_COLUMN_COUNT 10 // How much column on the invader matrix (how much invaders on one row)
-#define INVADERS_ROW_COUNT 5 // How much rows on the invader matrix
+#define INVADERS_COLUMN_COUNT 5 // How much column on the invader matrix (how much invaders on one row)
+#define INVADERS_ROW_COUNT 3 // How much rows on the invader matrix
 #define INVADERS_COUNT INVADERS_COLUMN_COUNT * INVADERS_ROW_COUNT // Total count of invaders
 #define INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT 15 // How much time invaders will strafe to the right at start.
 #define INVADER_STARTING_LEFT_STRAFE_COUNT_LIMIT 0 // How much time invaders will strafe to the left at start.
+
+#define X_SPEED_RATIO INVADER_WIDTH / INVADER_STRAFE_SPEED // how much strafe move to replace an invader
+#define LEFTIEST_ALIVE_COLUMN getColumnWithInvaderIndex(getFirstColumnWithAliveInvader())
+#define LEFT_COMPENSATION LEFTIEST_ALIVE_COLUMN * X_SPEED_RATIO
+#define RIGHTIEST_ALIVE_COLUMN getColumnWithInvaderIndex(getLastColumnWithAliveInvader())
+#define RIGHT_COMPENSATION (INVADERS_COLUMN_COUNT - 1 - RIGHTIEST_ALIVE_COLUMN) * X_SPEED_RATIO
 
 static int_fast8_t invaderDirection = 1; // 1 = right and -1 = left
 static uint_fast8_t invaderRightStrafeCountLimit = INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT; // How many time invaders moves on X axis before going down
@@ -26,6 +33,7 @@ static uint_fast8_t diveCounter = 0; // How much time we have dived so far
 
 typedef struct Invader {
   bool isDead = false;
+  SPRITE sprite = ssd1306_createSprite(0, 0, sizeof(heartImage), heartImage);
 } Invader;
 
 inline static uint_fast8_t getColumnWithInvaderIndex(uint_fast8_t index) {
@@ -91,24 +99,18 @@ uint_fast8_t getLastColumnWithAliveInvader() {
    Then change both X move limits for right and left.
 */
 inline static void compensateDead() {
-#define ld_speedXRation INVADER_WIDTH / INVADER_STRAFE_SPEED // how much strafe move to replace an invader
-#define ld_leftiestAliveColumn getColumnWithInvaderIndex(getFirstColumnWithAliveInvader())
-#define ld_leftCompensation ld_leftiestAliveColumn * ld_speedXRation
-#define ld_rightiestAliveColumn getColumnWithInvaderIndex(getLastColumnWithAliveInvader())
-#define ld_rightCompensation (INVADERS_COLUMN_COUNT - 1 - ld_rightiestAliveColumn) * ld_speedXRation
-  invaderRightStrafeCountLimit = INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT + ld_rightCompensation;
-  invaderLeftStrafeCountLimit = INVADER_STARTING_LEFT_STRAFE_COUNT_LIMIT - ld_leftCompensation;
+  invaderRightStrafeCountLimit = INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT + RIGHT_COMPENSATION;
+  invaderLeftStrafeCountLimit = INVADER_STARTING_LEFT_STRAFE_COUNT_LIMIT - LEFT_COMPENSATION;
 }
 
 void drawInvader(Invader* i, uint_fast8_t index, uint_fast8_t strafeCounter, uint_fast8_t diveCounter) {
-  /*SPRITE s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(heartImage),  heartImage);
-  s.erase();
-  s.draw();*/
   uint_fast8_t x = getPosX(index);
   uint_fast8_t y = getPosY(index);
-  //ssd1306_clearBlock(x, y/8, INVADER_WIDTH, sizeof(heartImage));
-  //gfx_drawMonoBitmap(x, y/8, sizeof(heartImage),9,  heartImage);
-  ssd1306_drawSpriteEx(x, y/8, sizeof(heartImage),  heartImage); //!!!!! y is in blocks vertical position in blocks (pixels/8)*/
+  /*i->sprite.x = x; // code with sprite
+  i->sprite.y = y;
+  i->sprite.eraseTrace();
+  i->sprite.draw();*/
+  ssd1306_drawSpriteEx(x, y/8, sizeof(heartImage),  heartImage); //!!!!! y is in blocks vertical position in blocks (pixels/8) // code without sprite
 }
 
 
@@ -116,6 +118,10 @@ void drawInvader(Invader* i, uint_fast8_t index, uint_fast8_t strafeCounter, uin
    Should be called only when they move to avoid flickering.
 */
 static inline drawInvaders() {
+  int posX = getPosX(0);
+  int posY = getPosY(0);
+  int posX1 = posX + INVADERS_COLUMN_COUNT*INVADER_X_GAP;
+  int posY2 = posY + INVADERS_ROW_COUNT*INVADER_Y_GAP;
   ssd1306_clearBlock(0, 0, 128, 50);
   for (uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
     if (!invaders[i].isDead) {
@@ -145,6 +151,10 @@ static void invade() {
     }
     drawInvaders(); // draw the invaders only when they move
   }
+}
+
+Rect getInvaderRect(int_fast8_t x, int_fast8_t y) {
+  return Rect{x, y, x + INVADER_WIDTH, y + INVADER_WIDTH};
 }
 
 
