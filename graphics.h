@@ -1,13 +1,7 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
-/**
-   Soba bitmap source is generated via script from https://github.com/robertgallup/bmp2hex
-   MIT license
-*/
-
-
-   #include "intf/ssd1306_interface.h"
+#include "intf/ssd1306_interface.h"
 
 /*
  * Coordinates start at 0, please do not overflow with x2 and y2.
@@ -89,21 +83,19 @@ const PROGMEM uint8_t invaderAlienIdle [] = {
   0B00100000,
 };
 
-const PROGMEM uint8_t shootSprite[3] =
+const PROGMEM uint8_t shootSprite[1] =
 {
-  0B00111110,
-  0B00111110,
-  0B00111110,
+  0B00011110,
 };
 
 const PROGMEM uint8_t playerBMP[7] =
 {
-  0B01111000,
-  0B01111000,
-  0B01111111,
-  0B01111111,
-  0B01111111,
-  0B01111000,
-  0B01111000
+  0B01000000,
+  0B01100000,
+  0B01100000,
+  0B01110000,
+  0B01100000,
+  0B01100000,
+  0B01000000
 };
 #endif

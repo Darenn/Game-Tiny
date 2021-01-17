@@ -16,6 +16,7 @@
 #include "debug.h"
 #include "physics.h"
 #include "bullet.h"
+#include "score.h"
 
 #define DEBUG
 
@@ -28,19 +29,11 @@
 #define TIME_PER_FRAME 32 // in ms
 
 Player p;
-Bullet theBullet;
+//Bullet theBullet;
 
-void setup() {
-  ssd1306_128x64_i2c_init();
-  ssd1306_setFixedFont(ssd1306xled_font6x8);
-  
-  SETUP_PINS;
-
+inline void drawIntro() {
   clearRect(0, 0, 127, 63); // clear screen
-
   delay(500);
-
-
   for (int8_t y=-24; y<16; y++)
   {     
       gfx_drawMonoBitmap(16, y, 40, 32, gameTinyLogo);
@@ -51,10 +44,17 @@ void setup() {
   beep(200,600);
   beep(300,200);
   beep(400,300);
-  
   delay(2000);
-
   clearRect(0, 0, 127, 63); // clear screen
+}
+
+void setup() {
+  ssd1306_128x64_i2c_init();
+  ssd1306_setFixedFont(ssd1306xled_font6x8);
+  
+  SETUP_PINS;
+
+  drawIntro();
 
   for (uint_fast8_t y = 0; y < INVADERS_ROW_COUNT; ++y) {
     for (uint_fast8_t x = 0; x < INVADERS_COLUMN_COUNT; ++x) {
@@ -63,10 +63,11 @@ void setup() {
     }
   }
 
-  theBullet.sprite = ssd1306_createSprite(0, 0, sizeof(shootSprite),  shootSprite);
-  theBullet.enabled = false;
+  /*theBullet.sprite = ssd1306_createSprite(0, 0, sizeof(shootSprite),  shootSprite);
+  theBullet.enabled = false;*/
+  updateScore(0);
 
-  playerForceDraw(&p);
+  p.sprite.draw();
 }
 
 void loop() {
@@ -75,17 +76,15 @@ void loop() {
   note(0, 0);
   updateInputs();
   playerUpdate(&p);
-  bulletUpdate(&theBullet);
+  //bulletUpdate(&theBullet);
 
   invade();
 
   if (IS_A_BUTTON_PRESSED) {
-    theBullet.enabled = true;
-    theBullet.sprite.x = p.sprite.x + 3;
-    theBullet.sprite.y = p.sprite.y - 5;
+    
   }
 
-    playerDraw(&p);
+  playerDraw(&p);
   
   // Fix 30 FPS
   signed int timeToWait = (signed int)TIME_PER_FRAME - (millis() - startLoopTime);

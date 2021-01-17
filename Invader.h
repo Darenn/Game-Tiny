@@ -3,6 +3,7 @@
 
 #include "ssd1306.h"
 #include "physics.h"
+#include "score.h"
 
 
 #include "ssd1306.h"
@@ -10,12 +11,16 @@
 #define INVADER_WIDTH 8 // The width of an invader in pixels
 #define INVADER_X_GAP 10 // The gap between each invader on the same row
 #define INVADER_Y_GAP 8 // The gap between two rows
+#define INVADER_STARTING_Y 8 // The gap between two rows
 #define INVADER_STRAFE_SPEED 2 // in pixel per strafe, how much pixels we go on the X axis at each strafe
 #define INVADER_DIVE_SPEED 8 // In pixel per dive, how much pixels we go down at each dive
-#define INVADERS_COLUMN_COUNT 8 // How much column on the invader matrix (how much invaders on one row)
+#define INVADERS_COLUMN_COUNT 9 // How much column on the invader matrix (how much invaders on one row)
 #define INVADERS_ROW_COUNT 4 // How much rows on the invader matrix
 #define INVADERS_COUNT INVADERS_COLUMN_COUNT * INVADERS_ROW_COUNT // Total count of invaders
-#define INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT 15 // How much time invaders will strafe to the right at start.
+
+#define INVADERS_STARTING_STRAFE_TIME 3000
+#define INVADERS_STRAFE_TIME_LOSS 100
+#define INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT 19 // How much time invaders will strafe to the right at start.
 #define INVADER_STARTING_LEFT_STRAFE_COUNT_LIMIT 0 // How much time invaders will strafe to the left at start.
 
 #define X_SPEED_RATIO INVADER_WIDTH / INVADER_STRAFE_SPEED // how much strafe move to replace an invader
@@ -31,10 +36,10 @@ static int_fast8_t strafeCounter = 0; // How much time we have strafed so far, c
 static uint_fast8_t diveCounter = 0; // How much time we have dived so far
 static int_fast8_t strafeCounterOld = 0; // How much time we have strafed so far, can be negative if moving on left
 static uint_fast8_t diveCounterOld = 0; // How much time we have dived so far
+static unsigned long strafeInterval = INVADERS_STARTING_STRAFE_TIME; // interval of time between each strafe action in ms
 
 typedef struct Invader {
   bool isDead = false;
-  //SPRITE sprite = ssd1306_createSprite(0, 0, sizeof(heartImage), heartImage);
 } Invader;
 
 Invader invaders [INVADERS_COUNT];
@@ -54,11 +59,19 @@ inline static uint_fast8_t getPosX(uint_fast8_t idx, uint_fast8_t strafeCounter 
 }
 
 inline static uint_fast8_t getPosY(uint_fast8_t idx,uint_fast8_t diveCounter = diveCounter) {
-  return getRowWithInvaderIndex(idx) * INVADER_Y_GAP + diveCounter * INVADER_DIVE_SPEED;
+  return INVADER_STARTING_Y + getRowWithInvaderIndex(idx) * INVADER_Y_GAP + diveCounter * INVADER_DIVE_SPEED;
 }
 
-void killInvader(Invader *invader, int i) {
+void killInvader(Invader *invader, uint_fast8_t i) {
+  strafeInterval -= INVADERS_STRAFE_TIME_LOSS;
   invader->isDead = true;
+  if(i>7) {
+    updateScore(10);
+  } else if(i > 15) {
+    updateScore(20);
+  } else {
+    updateScore(30);
+  }
   ssd1306_clearBlock(getPosX(i), getPosY(i), INVADER_WIDTH, INVADER_WIDTH);
 }
 
@@ -127,8 +140,8 @@ void drawInvader(Invader* i, uint_fast8_t index, uint_fast8_t strafeCounter, uin
 static inline drawInvaders() {
   int posX = getPosX(0, strafeCounterOld);
   int posY = getPosY(0, diveCounterOld);
-  int posX1 = posX + (INVADERS_COLUMN_COUNT+1)*INVADER_X_GAP;
-  int posY2 = posY + (INVADERS_ROW_COUNT+1)*INVADER_Y_GAP;
+  int posX1 = posX + (INVADERS_COLUMN_COUNT)*INVADER_X_GAP;
+  int posY2 = posY + (INVADERS_ROW_COUNT)*INVADER_Y_GAP;
   clearRect(posX, posY, posX1, posY2);
   for (int_fast8_t i = INVADERS_COUNT-1; i >= 0; i--) {
     if (!invaders[i].isDead) {
@@ -138,7 +151,6 @@ static inline drawInvaders() {
 }
 
 static void invade() {
-  static unsigned long strafeInterval = 500; // interval of time between each strafe action in ms
   static unsigned long lastStrafeTime = 0;  // the last time we strafed in ms
   static uint_fast8_t diveSpeed = 3; // How much pixel should go down when diving
 

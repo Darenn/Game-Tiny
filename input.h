@@ -3,7 +3,7 @@
 
 #include "debug.h"
 
-#define PIN_DPAD PB2
+#define PIN_DPAD 7
 #define PIN_BUTTON_A PB0
 
 #define IS_RIGHT_PAD_PRESSED padPinValue >= 660 && padPinValue <= 760

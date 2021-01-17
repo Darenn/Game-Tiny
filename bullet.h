@@ -8,7 +8,7 @@
 
 typedef struct Bullet {
   SPRITE sprite;
-  bool enabled;
+  bool enabled = false;
 } Bullet;
 
 // TODO optimized using only one get rect function?
@@ -16,10 +16,16 @@ Rect getBulletRect(Bullet *b) {
   return Rect{b->sprite.x, b->sprite.y, b->sprite.x + 8, b->sprite.y + 8};
 }
 
+Bullet createBullet() {
+  Bullet b;
+  b.sprite = ssd1306_createSprite(0, 0, sizeof(shootSprite),  shootSprite);
+  b.enabled = false;
+  return b;
+}
 
 void kill(Bullet *bullet) {
   bullet->enabled = false;
-  bullet->sprite.eraseTrace();
+  bullet->sprite.erase();
 }
 
 static bool processCollisionWithInvaders(Bullet *theBullet) {
@@ -43,7 +49,11 @@ void bulletDraw(Bullet* b) {
 }
 
 void bulletUpdate(Bullet* bullet) {
-  if (bullet->enabled) {   
+  if (bullet->enabled) {
+    if(bullet->sprite.y >= 60 || bullet->sprite.y <= 0) {
+      kill(bullet);
+      return;
+    }
     if(!processCollisionWithInvaders(bullet)) {
       bulletDraw(bullet);
     }
