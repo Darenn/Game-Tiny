@@ -6,6 +6,32 @@
    MIT license
 */
 
+
+   #include "intf/ssd1306_interface.h"
+
+/*
+ * Coordinates start at 0, please do not overflow with x2 and y2.
+ */
+void clearRect(lcdint_t x1, lcdint_t y1, lcdint_t x2, lcdint_t y2)
+{
+   //attinyAssert(x1 < x2, "!: Fill rect x1 >= x2");
+   //attinyAssert(y1 < y2, "!: Fill rect y1 >= y2");
+   //if ((lcduint_t)x2 >= ssd1306_displayWidth()) x2 = (lcdint_t)ssd1306_displayWidth() - 1;
+   //if ((lcduint_t)y2 >= ssd1306_displayHeight()) y2 = (lcdint_t)ssd1306_displayHeight() - 1;
+   uint8_t bank1 = (y1 >> 3);
+   uint8_t bank2 = (y2 >> 3);
+   ssd1306_lcd.set_block(x1, bank1, x2 - x1 + 1);
+   for (uint8_t bank = bank1; bank<=bank2; bank++)
+   {
+       for (uint8_t x=x1; x<=x2; x++)
+       {
+           ssd1306_lcd.send_pixels1(0x00000000);
+       }
+       ssd1306_lcd.next_page();
+   }
+   ssd1306_intf.stop();
+}
+
 const unsigned char gameTinyLogo [] PROGMEM = {
 0x00, 0xE0, 0x30, 0x28, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0xE4, 0x14, 0x0C,
 0xFC, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

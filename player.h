@@ -9,15 +9,8 @@
 
 typedef struct Player {
   uint_fast8_t speed = 1; // in pixel per frame COULD BE OPTIMIZED IF NOT CHANGED DURING GAME
-  SPRITE sprite;
+  SPRITE sprite = ssd1306_createSprite(START_POS_X, START_POS_Y, sizeof(playerBMP),  playerBMP);;
 } Player;
-
-Player* playerCreate() {
-  Player* player = malloc(sizeof(Player));
-  player->sprite = ssd1306_createSprite(START_POS_X, START_POS_Y, sizeof(playerBMP),  playerBMP);
-  player->speed = 1;
-  return player;
-}
 
 void playerDraw(Player *const p) {
   if (p->sprite.x != p->sprite.lx || p->sprite.y != p->sprite.ly) {
@@ -32,27 +25,23 @@ void playerForceDraw(Player *const p) {
 }
 
 static void playerMove(Player *const p) {
-  if (getPadRightPressed()) {
+  if (IS_RIGHT_PAD_PRESSED) {
     p->sprite.x += p->speed;
-    note(1, 3);
-  } else if (getPadDownPressed()) {
-    p->sprite.x -= p->speed;
-    note(2, 3);
-  } else if (getPadLeftPressed()) {
-    p->sprite.x -= p->speed;
-    note(3, 3);
-  } else if (getPadUpPressed()) {
+  } else if (IS_DOWN_PAD_PRESSED) {
     p->sprite.x += p->speed;
-    note(4, 3);
+  } else if (IS_LEFT_PAD_PRESSED) {
+    p->sprite.x -= p->speed;
+  } else if (IS_UP_PAD_PRESSED) {
+    p->sprite.x -= p->speed;
   }
 }
 
 static void playerShoot(Player *const p) {
   p->speed = 1;
-  if (getButtonAPressed()) {
+  if (IS_A_BUTTON_PRESSED) {
     //bulletCreate(p->sprite.x + 3, p->sprite.y - 5);
   }
-  if (getButtonBPressed()) {
+  if (IS_B_BUTTON_PRESSED) {
     p->sprite.x = START_POS_X;
     p->sprite.y = START_POS_Y;
   }

@@ -5,13 +5,7 @@
 #include "physics.h"
 
 
- #include "ssd1306.h"
- #include "ssd1306_fonts.h"
- #include "lcd/lcd_common.h"
- #include "intf/i2c/ssd1306_i2c.h"
- #include "intf/spi/ssd1306_spi.h"
- #include "intf/ssd1306_interface.h"
- #include "ssd1306_hal/io.h"
+#include "ssd1306.h"
 
 #define INVADER_WIDTH 8 // The width of an invader in pixels
 #define INVADER_X_GAP 10 // The gap between each invader on the same row
@@ -43,6 +37,8 @@ typedef struct Invader {
   //SPRITE sprite = ssd1306_createSprite(0, 0, sizeof(heartImage), heartImage);
 } Invader;
 
+Invader invaders [INVADERS_COUNT];
+
 inline static uint_fast8_t getColumnWithInvaderIndex(uint_fast8_t index) {
   return index % INVADERS_COLUMN_COUNT;
 }
@@ -65,8 +61,6 @@ void killInvader(Invader *invader, int i) {
   invader->isDead = true;
   ssd1306_clearBlock(getPosX(i), getPosY(i), INVADER_WIDTH, INVADER_WIDTH);
 }
-
-Invader invaders [INVADERS_COUNT];
 
 inline static uint_fast8_t getIndexByCoordinates(uint_fast8_t row, uint_fast8_t col) {
   return col + row * INVADERS_COLUMN_COUNT;
@@ -113,11 +107,12 @@ inline static void compensateDead() {
 void drawInvader(Invader* i, uint_fast8_t index, uint_fast8_t strafeCounter, uint_fast8_t diveCounter) {
   SPRITE s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderAlienIdle), invaderAlienIdle);
   if(index>7) {
-    if(strafeCounter % 2 != 0) {
+    s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderPoulpeIdle), invaderPoulpeIdle);
+    /*if(strafeCounter % 2 != 0) {
       ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderPoulpeMove), invaderPoulpeMove);
     } else {
       s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderPoulpeIdle), invaderPoulpeIdle);
-    }
+    }*/
       
   } else if(index > 15) {
     s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderGhostIdle), invaderGhostIdle);
@@ -125,27 +120,6 @@ void drawInvader(Invader* i, uint_fast8_t index, uint_fast8_t strafeCounter, uin
 
   ssd1306_drawSprite(&s);
 }
-
-
- void fillRect(lcdint_t x1, lcdint_t y1, lcdint_t x2, lcdint_t y2)
- {
-     attinyAssert(x1 < x2, "!: Fill rect x1 >= x2");
-     attinyAssert(y1 < y2, "!: Fill rect y1 >= y2");
-     if ((lcduint_t)x2 >= ssd1306_displayWidth()) x2 = (lcdint_t)ssd1306_displayWidth() - 1;
-     if ((lcduint_t)y2 >= ssd1306_displayHeight()) y2 = (lcdint_t)ssd1306_displayHeight() - 1;
-     uint8_t bank1 = (y1 >> 3);
-     uint8_t bank2 = (y2 >> 3);
-     ssd1306_lcd.set_block(x1, bank1, x2 - x1 + 1);
-     for (uint8_t bank = bank1; bank<=bank2; bank++)
-     {
-         for (uint8_t x=x1; x<=x2; x++)
-         {
-             ssd1306_lcd.send_pixels1(0x00000000);
-         }
-         ssd1306_lcd.next_page();
-     }
-     ssd1306_intf.stop();
- }
 
 /*
    Should be called only when they move to avoid flickering.
@@ -155,19 +129,13 @@ static inline drawInvaders() {
   int posY = getPosY(0, diveCounterOld);
   int posX1 = posX + (INVADERS_COLUMN_COUNT+1)*INVADER_X_GAP;
   int posY2 = posY + (INVADERS_ROW_COUNT+1)*INVADER_Y_GAP;
-  fillRect(posX, posY, posX1, posY2);
+  clearRect(posX, posY, posX1, posY2);
   for (int_fast8_t i = INVADERS_COUNT-1; i >= 0; i--) {
     if (!invaders[i].isDead) {
       drawInvader(&invaders[i], i, strafeCounter, diveCounter);
     }
   }
-  //debugDisplayInt(posX, 0, 10);
-  //debugDisplayInt(posY, 0, 20);
-  //debugDisplayInt(posX1, 0, 30);
-  //debugDisplayInt(posY2, 0, 40);
 }
-
-
 
 static void invade() {
   static unsigned long strafeInterval = 500; // interval of time between each strafe action in ms

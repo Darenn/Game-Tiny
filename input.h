@@ -3,41 +3,24 @@
 
 #include "debug.h"
 
-#define PIN_DPAD 7
+#define PIN_DPAD PB2
 #define PIN_BUTTON_A PB0
 
-void setup_inputs() {
-  pinMode(PIN_DPAD, INPUT);
-  pinMode(PIN_BUTTON_A, INPUT);
+#define IS_RIGHT_PAD_PRESSED padPinValue >= 660 && padPinValue <= 760
+#define IS_DOWN_PAD_PRESSED padPinValue >= 460 && padPinValue <= 560
+#define IS_LEFT_PAD_PRESSED padPinValue >= 2 && padPinValue <= 30
+#define IS_UP_PAD_PRESSED padPinValue >= 850 && padPinValue <= 1020
+#define IS_A_BUTTON_PRESSED buttonPinValue == 1
+#define IS_B_BUTTON_PRESSED padPinValue >= 1021 && padPinValue <= 1030
+
+  //sei();                      // enable all interrupts
+
+static uint_fast16_t padPinValue;
+static uint_fast16_t buttonPinValue;
+
+void updateInputs() {
+  padPinValue = analogRead(PIN_DPAD); // analog read is actually very optimized for at tiny
+  buttonPinValue = PINB & 0b00000001; // read form pb0
 }
 
-bool getPadRightPressed() {
-  uint_fast16_t padPinValue = analogRead(PIN_DPAD);
-  return padPinValue >= 660 && padPinValue <= 760;
-}
-
-bool getPadDownPressed() {
-  uint_fast16_t padPinValue = analogRead(PIN_DPAD);
-  return padPinValue >= 460 && padPinValue <= 560;
-}
-
-bool getPadLeftPressed() {
-  uint_fast16_t padPinValue = analogRead(PIN_DPAD);
-  return padPinValue >= 2 && padPinValue <= 30;
-}
-
-bool getPadUpPressed() {
-  uint_fast16_t padPinValue = analogRead(PIN_DPAD);
-  return padPinValue >= 850 && padPinValue <= 1020;
-}
-
-bool getButtonBPressed() {
-  uint_fast16_t padPinValue = analogRead(PIN_DPAD);
-  return padPinValue >= 1021 && padPinValue <= 1030;
-}
-
-bool getButtonAPressed() {
-  uint_fast16_t buttonPinValue = digitalRead(PIN_BUTTON_A);
-  return buttonPinValue == HIGH;
-}
 #endif

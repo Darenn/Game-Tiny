@@ -17,20 +17,6 @@ bool isColliding(const SSD1306_RECT rect1, const SSD1306_RECT rect2) {
          rect1.bottom > rect2.top;
 }
 
-bool isColliding(const SPRITE *const s1, const SPRITE *const s2) {
-  return s1->x < s2->x + s2->w &&
-         s1->x + s1->w > s2->x &&
-         s1->y < s2->y + s2->w &&// TODO use HEIGHT and not W
-         s1->y + s1->w > s2->y;
-}
-
-bool isColliding(const Rect *const r1, const Rect *const r2) {
-  return r1->left < r2->right &&
-         r1->right > r2->left &&
-         r1->top < r2->bottom &&
-         r1->bottom > r2->top;
-}
-
 bool isColliding(const Rect r1, const Rect r2) {
   return r1.left < r2.right &&
          r1.right > r2.left &&
