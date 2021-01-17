@@ -3,13 +3,38 @@
 
 #define BULLET_SPEED 3
 
+#include "physics.h"
+#include "invader.h"
+
 typedef struct Bullet {
   SPRITE sprite;
   bool enabled;
 } Bullet;
 
-void bulletUpdate(Bullet* bullet) {
-  bullet->sprite.y -= BULLET_SPEED;
+// TODO optimized using only one get rect function?
+Rect getBulletRect(Bullet *b) {
+  return Rect{b->sprite.x, b->sprite.y, b->sprite.x + 8, b->sprite.y + 8};
+}
+
+
+void kill(Bullet *bullet) {
+  bullet->enabled = false;
+  bullet->sprite.eraseTrace();
+}
+
+static bool processCollisionWithInvaders(Bullet *theBullet) {
+  for (uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
+      uint_fast8_t x = getPosX(i);
+      uint_fast8_t y = getPosY(i);   
+      if (!invaders[i].isDead && isColliding(getBulletRect(theBullet), getInvaderRect(x, y))) {
+        kill(theBullet);
+        killInvader(&invaders[i], i);
+        compensateDead();
+        drawInvaders();
+        return true;
+      }
+    }
+   return false;
 }
 
 void bulletDraw(Bullet* b) {
@@ -17,14 +42,16 @@ void bulletDraw(Bullet* b) {
   b->sprite.draw();
 }
 
-void kill(Bullet *bullet) {
-  bullet->enabled = false;
-  bullet->sprite.eraseTrace();
+void bulletUpdate(Bullet* bullet) {
+  if (bullet->enabled) {   
+    if(!processCollisionWithInvaders(bullet)) {
+      bulletDraw(bullet);
+    }
+    bullet->sprite.y -= BULLET_SPEED;
+  }
 }
 
-// TODO optimized using only one get rect function?
-Rect getBulletRect(Bullet *b) {
-  return Rect{b->sprite.x, b->sprite.y, b->sprite.x + 8, b->sprite.y + 8};
-}
+
+
 
 #endif

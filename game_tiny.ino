@@ -31,8 +31,6 @@ void setup() {
   ssd1306_128x64_i2c_init();
   ssd1306_setFixedFont(ssd1306xled_font6x8);
 
-  //pinMode(PIN_BUZZER, OUTPUT);
-  //setup_inputs();
   DDRB |= 0b00011010;         // set PB1 as output (for the speaker), PB0 and PB2 as input
   //sei();                      // enable all interrupts*/ //TODO more optimized than pinmode?
 
@@ -40,10 +38,11 @@ void setup() {
 
   delay(500);
 
+
   for (int8_t y=-24; y<16; y++)
-  {
-        gfx_drawMonoBitmap(16, y, 40, 32, gameTinyLogo);
-        delay(25);
+  {     
+      gfx_drawMonoBitmap(16, y, 40, 32, gameTinyLogo);
+      delay(25);
   }
   ssd1306_printFixed_oldStyle(60, 29, "SPACE", STYLE_NORMAL);
   ssd1306_printFixed_oldStyle(65, 32, "INVADERS", STYLE_NORMAL);
@@ -70,14 +69,9 @@ void setup() {
 
 void loop() {
   float startLoopTime = millis();  // Save time to get 30 FPS
-  //ssd1306_clearScreen();
-
-  //ssd1306_setColor(RGB_COLOR8(0, 0, 0));
-  //ssd1306_fillRect(0, 0, 128, 64);
   
   note(0, 0);
-  
-
+ 
   playerUpdate(p);
 
   if (theBullet.enabled) {
@@ -111,7 +105,7 @@ void loop() {
   // Fix 30 FPS
   signed int timeToWait = (signed int)TIME_PER_FRAME - (millis() - startLoopTime);
   if (timeToWait >= 0 && timeToWait < 33) {
-    debugDisplayInt(timeToWait, 50, 0);
+    //debugDisplayInt(timeToWait, 50, 0);
     delay(timeToWait);
   } else {
     //delay (3000);
