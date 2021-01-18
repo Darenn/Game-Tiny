@@ -15,8 +15,13 @@
 
 typedef struct Player {
   SPRITE sprite = ssd1306_createSprite(START_POS_X, START_POS_Y, sizeof(playerBMP),  playerBMP);
-  Bullet bullet = createBullet();
+  Bullet bullet;
 } Player;
+
+void init_player(Player *p) {
+   p->bullet.sprite = ssd1306_createSprite(0, 0, sizeof(shootSprite),  shootSprite);  
+   p->sprite.draw();
+}
 
 void playerDraw(Player *const p) {
   if (p->sprite.x != p->sprite.lx || p->sprite.y != p->sprite.ly) {
@@ -41,9 +46,8 @@ static void playerShoot(Player *const p) {
   static unsigned long lastShootTime = 0;
   if (IS_A_BUTTON_PRESSED && millis() - lastShootTime >= PLAYER_SHOOT_COOLDOWN) {
     lastShootTime = millis();
-    p->bullet.enabled = true;
-    p->bullet.sprite.x = p->sprite.x + 4;
-    p->bullet.sprite.y = p->sprite.y - 4;
+    shoot(&p->bullet, p->sprite.x + 4, p->sprite.y - 4);
+    note(7,4);
   }
   if (IS_B_BUTTON_PRESSED) {
     p->sprite.x = START_POS_X;
@@ -54,9 +58,7 @@ static void playerShoot(Player *const p) {
 void playerUpdate(Player *const player) {
   playerMove(player);
   playerShoot(player);
-  if(player->bullet.enabled) {
-    bulletUpdate(&player->bullet);
-  }
+  bulletUpdate(&player->bullet);
 }
 
 #endif

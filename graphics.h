@@ -50,6 +50,17 @@ const PROGMEM uint8_t invaderGhostIdle [] = {
   0B01010000,
 };
 
+const PROGMEM uint8_t invaderGhostMove [] = {
+  0B00010000,
+  0B00111000,
+  0B01010100,
+  0B00111100,
+  0B00111100,
+  0B01010100,
+  0B00111000,
+  0B00010000,
+};
+
 const PROGMEM uint8_t invaderPoulpeIdle [] = {
   0B00001100,
   0B00001110,
@@ -83,6 +94,17 @@ const PROGMEM uint8_t invaderAlienIdle [] = {
   0B00100000,
 };
 
+const PROGMEM uint8_t invaderAlienMove [] = {
+  0B00001000,
+  0B00010100,
+  0B01101000,
+  0B00110000,
+  0B00110000,
+  0B01101000,
+  0B00010100,
+  0B00001000,
+};
+
 const PROGMEM uint8_t shootSprite[1] =
 {
   0B00011110,
@@ -97,5 +119,16 @@ const PROGMEM uint8_t playerBMP[7] =
   0B01100000,
   0B01100000,
   0B01000000
+};
+
+const PROGMEM uint8_t explosion[] =
+{
+  0B01000001,
+  0B00100010,
+  0B10000001,
+  0B10000001,
+  0B00100100,
+  0B01000010,
+  0B10000001
 };
 #endif

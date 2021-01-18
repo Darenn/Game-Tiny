@@ -9,14 +9,14 @@
 #define SCORE_UFO_STRONG 300
 
 
-static uint_fast8_t score = 0;
+static uint_fast16_t score = 0;
 
 void updateScore(uint_fast8_t toAdd) {
   score += toAdd;
   ssd1306_printFixed_oldStyle(0, 0, "SCORE:", STYLE_NORMAL);
-  char tempStr[4] = {0};
+  char tempStr[6] = {0};
   utoa(score, tempStr, 10);
-  ssd1306_printFixed_oldStyle(6*6, 0, tempStr, STYLE_NORMAL);
+  ssd1306_printFixed_oldStyle(40, 0, tempStr, STYLE_NORMAL);
 }
 
 #endif

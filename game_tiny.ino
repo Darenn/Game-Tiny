@@ -1,3 +1,4 @@
+
 /**
      Attiny85 PINS
                     ____
@@ -67,7 +68,7 @@ void setup() {
   theBullet.enabled = false;*/
   updateScore(0);
 
-  p.sprite.draw();
+  init_player(&p);
 }
 
 void loop() {

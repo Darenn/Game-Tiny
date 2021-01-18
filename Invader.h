@@ -18,8 +18,8 @@
 #define INVADERS_ROW_COUNT 4 // How much rows on the invader matrix
 #define INVADERS_COUNT INVADERS_COLUMN_COUNT * INVADERS_ROW_COUNT // Total count of invaders
 
-#define INVADERS_STARTING_STRAFE_TIME 3000
-#define INVADERS_STRAFE_TIME_LOSS 100
+#define INVADERS_STARTING_STRAFE_TIME 2750 //3000
+#define INVADERS_STRAFE_TIME_LOSS 75
 #define INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT 19 // How much time invaders will strafe to the right at start.
 #define INVADER_STARTING_LEFT_STRAFE_COUNT_LIMIT 0 // How much time invaders will strafe to the left at start.
 
@@ -65,14 +65,17 @@ inline static uint_fast8_t getPosY(uint_fast8_t idx,uint_fast8_t diveCounter = d
 void killInvader(Invader *invader, uint_fast8_t i) {
   strafeInterval -= INVADERS_STRAFE_TIME_LOSS;
   invader->isDead = true;
-  if(i>7) {
+  if(i>=INVADERS_COLUMN_COUNT) {
     updateScore(10);
-  } else if(i > 15) {
+  } else if(i >= INVADERS_COLUMN_COUNT*2) {
     updateScore(20);
   } else {
     updateScore(30);
   }
-  ssd1306_clearBlock(getPosX(i), getPosY(i), INVADER_WIDTH, INVADER_WIDTH);
+  uint_fast8_t x = getPosX(i);
+  uint_fast8_t y = getPosY(i);
+  //clearRect(x, y, x+INVADER_WIDTH, y+INVADER_WIDTH);
+  //ssd1306_clearBlock(getPosX(i), getPosY(i), INVADER_WIDTH, INVADER_WIDTH);
 }
 
 inline static uint_fast8_t getIndexByCoordinates(uint_fast8_t row, uint_fast8_t col) {
@@ -91,21 +94,34 @@ uint_fast8_t getFirstColumnWithAliveInvader() {
       }
     }
   }
-  return 99;
+  return 0;
 }
+
+/*
+ * Returns the last row with an invader still alive.
+ */
+uint_fast8_t getLastRowWithAliveInvader() {
+  for (int_fast8_t i = INVADERS_COUNT - 1; i > 0; --i) {
+    if (!invaders[i].isDead) {
+        return i%INVADERS_COLUMN_COUNT;
+      }
+  }
+  return 0;
+}
+
 
 /*
  * Returns the last column (rightiest) with an invader still alive.
  */
 uint_fast8_t getLastColumnWithAliveInvader() {
-  for (uint_fast8_t col = INVADERS_COLUMN_COUNT - 1; col > 0; --col) {
+  for (int_fast8_t col = INVADERS_COLUMN_COUNT - 1; col > 0; --col) {
     for (uint_fast8_t row = 0; row < INVADERS_ROW_COUNT; ++row) {
       if (!invaders[getIndexByCoordinates(row, col)].isDead) {
         return col;
       }
     }
   }
-  return 99;
+  return 0;
 }
 
 /*
@@ -118,17 +134,27 @@ inline static void compensateDead() {
 }
 
 void drawInvader(Invader* i, uint_fast8_t index, uint_fast8_t strafeCounter, uint_fast8_t diveCounter) {
-  SPRITE s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderAlienIdle), invaderAlienIdle);
-  if(index>7) {
-    s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderPoulpeIdle), invaderPoulpeIdle);
-    /*if(strafeCounter % 2 != 0) {
-      ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderPoulpeMove), invaderPoulpeMove);
+  SPRITE s;
+  if(index>=INVADERS_COLUMN_COUNT*2) {
+    
+    if(strafeCounter % 2 != 0) {
+      s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderGhostMove), invaderGhostMove);
     } else {
-      s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderPoulpeIdle), invaderPoulpeIdle);
-    }*/
-      
-  } else if(index > 15) {
-    s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderGhostIdle), invaderGhostIdle);
+      s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderGhostIdle), invaderGhostIdle);
+    }  
+  } 
+  else if(index >= INVADERS_COLUMN_COUNT) {
+      if(strafeCounter % 2 != 0) {
+        s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderPoulpeMove), invaderPoulpeMove);
+      } else {
+        s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderPoulpeIdle), invaderPoulpeIdle);
+      } 
+  } else {
+    if(strafeCounter % 2 != 0) {
+        s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderAlienMove), invaderAlienMove);
+     } else {
+        s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderAlienIdle), invaderAlienIdle);
+     }
   }
 
   ssd1306_drawSprite(&s);
@@ -140,9 +166,9 @@ void drawInvader(Invader* i, uint_fast8_t index, uint_fast8_t strafeCounter, uin
 static inline drawInvaders() {
   int posX = getPosX(0, strafeCounterOld);
   int posY = getPosY(0, diveCounterOld);
-  int posX1 = posX + (INVADERS_COLUMN_COUNT)*INVADER_X_GAP;
-  int posY2 = posY + (INVADERS_ROW_COUNT)*INVADER_Y_GAP;
-  clearRect(posX, posY, posX1, posY2);
+  //int posX1 = posX + INVADERS_COLUMN_COUNT*INVADER_X_GAP;
+  //int posY2 = posY + INVADERS_ROW_COUNT*INVADER_Y_GAP;
+  clearRect(0, 8, 127, 50);
   for (int_fast8_t i = INVADERS_COUNT-1; i >= 0; i--) {
     if (!invaders[i].isDead) {
       drawInvader(&invaders[i], i, strafeCounter, diveCounter);
@@ -153,8 +179,11 @@ static inline drawInvaders() {
 static void invade() {
   static unsigned long lastStrafeTime = 0;  // the last time we strafed in ms
   static uint_fast8_t diveSpeed = 3; // How much pixel should go down when diving
+  static uint_fast8_t noteCounter = 4;
 
   if (millis() - lastStrafeTime > strafeInterval) {
+    if(noteCounter <= 0) noteCounter = 4;
+    note (--noteCounter, 3);
     lastStrafeTime = millis();
 #define ld_arrivedOnRight invaderDirection == 1 && strafeCounter >= invaderRightStrafeCountLimit
 #define ld_arrivedOnLeft invaderDirection == -1 && strafeCounter <= invaderLeftStrafeCountLimit
