@@ -4,6 +4,7 @@
 #include "input.h"
 #include "ssd1306.h"
 #include "bullet.h"
+#include "invader.h"
 
 
 #define PLAYER_WIDTH 7
@@ -11,16 +12,25 @@
 #define START_POS_X 64 - PLAYER_WIDTH/2
 #define START_POS_Y 56
 #define PLAYER_SHOOT_COOLDOWN 700 //in ms
-#define PLAYER_SPEED 1 // pixel per frame
+#define PLAYER_SPEED 2 // pixel per frame
 
 typedef struct Player {
-  SPRITE sprite = ssd1306_createSprite(START_POS_X, START_POS_Y, sizeof(playerBMP),  playerBMP);
+  SPRITE sprite;
   Bullet bullet;
+  uint_fast8_t hp = 3;
 } Player;
 
+void displayPlayerLife(Player *p) {
+  ssd1306_printFixed_oldStyle(127-6*6, 0, "LIFE:", STYLE_NORMAL);
+  char tempStr[6] = {0};
+  utoa(p->hp, tempStr, 10);
+  ssd1306_printFixed_oldStyle(127-1*6, 0, tempStr, STYLE_NORMAL);
+}
+
 void init_player(Player *p) {
-   p->bullet.sprite = ssd1306_createSprite(0, 0, sizeof(shootSprite),  shootSprite);  
+   p->sprite = ssd1306_createSprite(START_POS_X, START_POS_Y, sizeof(playerBMP),  playerBMP); 
    p->sprite.draw();
+   displayPlayerLife(p);
 }
 
 void playerDraw(Player *const p) {
@@ -44,21 +54,103 @@ static void playerMove(Player *const p) {
 
 static void playerShoot(Player *const p) {
   static unsigned long lastShootTime = 0;
-  if (IS_A_BUTTON_PRESSED && millis() - lastShootTime >= PLAYER_SHOOT_COOLDOWN) {
-    lastShootTime = millis();
-    shoot(&p->bullet, p->sprite.x + 4, p->sprite.y - 4);
-    note(7,4);
+  static bool cooldownOver = true;
+  if(!cooldownOver && millis() - lastShootTime >= PLAYER_SHOOT_COOLDOWN) {
+    p->sprite = ssd1306_createSprite(p->sprite.x, p->sprite.y, sizeof(playerBMP),  playerBMP);
+    p->sprite.draw();
+    cooldownOver = true;
   }
+
+  if (cooldownOver && IS_A_BUTTON_PRESSED) {
+      lastShootTime = millis();
+      p->sprite = ssd1306_createSprite(p->sprite.x, p->sprite.y, sizeof(playerShot),  playerShot);
+      shoot(&p->bullet, p->sprite.x + 4, p->sprite.y - 4);
+      note(7,4);
+      cooldownOver = false;
+    }
+  
   if (IS_B_BUTTON_PRESSED) {
     p->sprite.x = START_POS_X;
     p->sprite.y = START_POS_Y;
   }
 }
 
+
+static bool processCollisionWithInvaders(Bullet *theBullet) {
+  for (uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
+      uint_fast8_t x = getPosX(i);
+      uint_fast8_t y = getPosY(i);   
+      if (!invaders[i].isDead && isColliding(getBulletRect(theBullet), getInvaderRect(x, y))) {
+        killInvader(&invaders[i], i);
+        compensateDead(); // compensate the loss before redrawing
+        drawInvaders(); // draw the invaders before the bullet explosion
+        theBullet->sprite.x = x; // To draw the explosion on the invader position
+        theBullet->sprite.y = y;
+        kill(theBullet);
+        return true;
+      }
+    }
+   return false;
+}
+
+void playPlayerExplosionSound() {
+  note(4,1);
+  delay(100);
+  note(3,1);
+  delay(100);
+  note(4,1);
+  delay(100);
+  note(3,1);
+  delay(100);
+  note(2,1);
+  delay(100);
+  note(3,1);
+  delay(200);
+  note(2,1);
+  delay(300);
+  note(1,1);
+  delay(400);
+  note(1,1);
+  delay(500);
+  note(0,0);
+}
+
+
+
+void playerLoosesHP(Player *p) {
+  --p->hp;
+  playPlayerExplosionSound();
+  delay(800);
+  if(p->hp == 0) {
+   // display game over
+   // save score
+   // back to start
+  } else {
+    displayPlayerLife(p);
+    init_player(p);
+  }
+}
+
+static bool processCollisionWithPlayer(Player *p, Bullet *theBullet) {
+  Rect playerRect = Rect{p->sprite.x, p->sprite.y, p->sprite.x + 8, p->sprite.y + 8};
+  if (isColliding(getBulletRect(theBullet), playerRect)) {
+    //theBullet->sprite.x = x; // To draw the explosion on the invader position
+    //theBullet->sprite.y = y;
+    kill(theBullet);
+    playerLoosesHP(p);
+  }
+}
+
+
 void playerUpdate(Player *const player) {
+  processCollisionWithInvaders(&player->bullet);
+  if(bulletFast.enabled) {
+    processCollisionWithPlayer(player, &bulletFast);
+  }
   playerMove(player);
   playerShoot(player);
   bulletUpdate(&player->bullet);
+  
 }
 
 #endif

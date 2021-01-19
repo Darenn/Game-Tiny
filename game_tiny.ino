@@ -56,13 +56,7 @@ void setup() {
   SETUP_PINS;
 
   drawIntro();
-
-  for (uint_fast8_t y = 0; y < INVADERS_ROW_COUNT; ++y) {
-    for (uint_fast8_t x = 0; x < INVADERS_COLUMN_COUNT; ++x) {
-      invaders[x + y * INVADERS_COLUMN_COUNT] = Invader();
-      drawInvader(&invaders[x + y * INVADERS_COLUMN_COUNT], x + y * INVADERS_COLUMN_COUNT , 0, 0);
-    }
-  }
+  initInvaders();
 
   /*theBullet.sprite = ssd1306_createSprite(0, 0, sizeof(shootSprite),  shootSprite);
   theBullet.enabled = false;*/
@@ -80,6 +74,7 @@ void loop() {
   //bulletUpdate(&theBullet);
 
   invade();
+  invadersShoot();
 
   if (IS_A_BUTTON_PRESSED) {
     

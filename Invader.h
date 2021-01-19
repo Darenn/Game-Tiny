@@ -4,6 +4,8 @@
 #include "ssd1306.h"
 #include "physics.h"
 #include "score.h"
+#include "bullet.h"
+#include "utils.h"
 
 
 #include "ssd1306.h"
@@ -29,6 +31,10 @@
 #define RIGHTIEST_ALIVE_COLUMN getColumnWithInvaderIndex(getLastColumnWithAliveInvader())
 #define RIGHT_COMPENSATION (INVADERS_COLUMN_COUNT - 1 - RIGHTIEST_ALIVE_COLUMN) * X_SPEED_RATIO
 
+#define STARTING_TIME_BETWEEN_SHOTS_MIN 30 * 2 // in frame
+#define STARTING_TIME_BETWEEN_SHOTS_MAX 30 * 5 // in frame
+#define FAST_BULLET_SPEED 3
+
 static int_fast8_t invaderDirection = 1; // 1 = right and -1 = left
 static int_fast8_t invaderRightStrafeCountLimit = INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT; // How many time invaders moves on X axis before going down
 static int_fast8_t invaderLeftStrafeCountLimit = 0; // How many time invaders moves on X axis before going down
@@ -43,6 +49,8 @@ typedef struct Invader {
 } Invader;
 
 Invader invaders [INVADERS_COUNT];
+Bullet bulletFast;
+Bullet bulletSlow;
 
 inline static uint_fast8_t getColumnWithInvaderIndex(uint_fast8_t index) {
   return index % INVADERS_COLUMN_COUNT;
@@ -138,22 +146,22 @@ void drawInvader(Invader* i, uint_fast8_t index, uint_fast8_t strafeCounter, uin
   if(index>=INVADERS_COLUMN_COUNT*2) {
     
     if(strafeCounter % 2 != 0) {
-      s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderGhostMove), invaderGhostMove);
+      s = ssd1306_createSprite(getPosX(index), getPosY(index), sizeof(invaderGhostMove), invaderGhostMove);
     } else {
-      s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderGhostIdle), invaderGhostIdle);
+      s = ssd1306_createSprite(getPosX(index), getPosY(index), sizeof(invaderGhostIdle), invaderGhostIdle);
     }  
   } 
   else if(index >= INVADERS_COLUMN_COUNT) {
       if(strafeCounter % 2 != 0) {
-        s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderPoulpeMove), invaderPoulpeMove);
+        s = ssd1306_createSprite(getPosX(index), getPosY(index, diveCounter), sizeof(invaderPoulpeMove), invaderPoulpeMove);
       } else {
-        s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderPoulpeIdle), invaderPoulpeIdle);
+        s = ssd1306_createSprite(getPosX(index), getPosY(index), sizeof(invaderPoulpeIdle), invaderPoulpeIdle);
       } 
   } else {
     if(strafeCounter % 2 != 0) {
-        s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderAlienMove), invaderAlienMove);
+        s = ssd1306_createSprite(getPosX(index), getPosY(index, diveCounter), sizeof(invaderAlienMove), invaderAlienMove);
      } else {
-        s = ssd1306_createSprite(getPosX(index, strafeCounter), getPosY(index, diveCounter), sizeof(invaderAlienIdle), invaderAlienIdle);
+        s = ssd1306_createSprite(getPosX(index), getPosY(index, diveCounter), sizeof(invaderAlienIdle), invaderAlienIdle);
      }
   }
 
@@ -203,8 +211,50 @@ static void invade() {
   }
 }
 
+/*
+ * Returns the lowest alive alien on given column
+ */
+uint_fast8_t getLastRowWithAliveInvaderOnColumn(uint_fast8_t col) {
+    for (int_fast8_t row = INVADERS_ROW_COUNT-1; row > 0; --row) {
+      if (!invaders[getIndexByCoordinates(row, col)].isDead) {
+        return row;
+      }
+    }
+  return 0;
+}
+
+static void invadersShoot() {
+  static uint_fast8_t timeBetweenShotsMin = STARTING_TIME_BETWEEN_SHOTS_MIN;
+  static uint_fast8_t timeBetweenShotsMax = STARTING_TIME_BETWEEN_SHOTS_MIN;
+  static uint_fast8_t timeUntilNestShot = GTRandom(timeBetweenShotsMin, timeBetweenShotsMax);
+  static uint_fast8_t shotTimer = 0;
+
+  ++shotTimer;
+  if(shotTimer >= timeUntilNestShot) {
+    shotTimer = 0;
+    timeUntilNestShot = GTRandom(timeBetweenShotsMin, timeBetweenShotsMax);
+    uint_fast8_t col = GTRandom(getFirstColumnWithAliveInvader(), getLastColumnWithAliveInvader());
+    uint_fast8_t row = getLastRowWithAliveInvaderOnColumn(col);
+    uint_fast8_t index = getIndexByCoordinates(row, col);
+    shoot(&bulletFast, getPosX(index)+ INVADER_WIDTH/2, getPosY(index) + INVADER_WIDTH);
+  }
+
+  updateFastBullet(&bulletFast);
+}
+
 Rect getInvaderRect(int_fast8_t x, int_fast8_t y) {
   return Rect{x, y, x + INVADER_WIDTH, y + INVADER_WIDTH};
+}
+
+void initInvaders() {
+  for (uint_fast8_t y = 0; y < INVADERS_ROW_COUNT; ++y) {
+    for (uint_fast8_t x = 0; x < INVADERS_COLUMN_COUNT; ++x) {
+      invaders[x + y * INVADERS_COLUMN_COUNT] = Invader();
+      drawInvader(&invaders[x + y * INVADERS_COLUMN_COUNT], x + y * INVADERS_COLUMN_COUNT , 0, 0);
+    }
+  }
+  bulletFast.sprite = ssd1306_createSprite(0, 0, sizeof(bulletFast1), bulletFast1);
+  bulletFast.directionnalSpeed = FAST_BULLET_SPEED;
 }
 
 

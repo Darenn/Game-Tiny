@@ -1,17 +1,18 @@
 #ifndef BULLET_H
 #define BULLET_H
 
-#define BULLET_SPEED 3
+#define PLAYER_BULLET_SPEED -3
 #define EXPLOSION_DURATION 15 // in frame
 
 #include "physics.h"
-#include "invader.h"
 
 typedef struct Bullet {
   SPRITE sprite;
   bool enabled = false;
-  int_fast8_t explosionTimer = 0;
-  bool exploding = false;
+  uint_fast8_t directionnalSpeed = PLAYER_BULLET_SPEED;
+  
+  //int_fast8_t explosionTimer = 0;
+  //bool exploding = false;
 } Bullet;
 
 
@@ -30,23 +31,6 @@ void kill(Bullet *bullet) {
   note(1,1);
 }
 
-static bool processCollisionWithInvaders(Bullet *theBullet) {
-  for (uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
-      uint_fast8_t x = getPosX(i);
-      uint_fast8_t y = getPosY(i);   
-      if (!invaders[i].isDead && isColliding(getBulletRect(theBullet), getInvaderRect(x, y))) {
-        killInvader(&invaders[i], i);
-        compensateDead(); // compensate the loss before redrawing
-        drawInvaders(); // draw the invaders before the bullet explosion
-        theBullet->sprite.x = x; // To draw the explosion on the invader position
-        theBullet->sprite.y = y;
-        kill(theBullet);
-        return true;
-      }
-    }
-   return false;
-}
-
 void bulletDraw(Bullet* b) {
   b->sprite.eraseTrace();
   b->sprite.draw();
@@ -58,10 +42,11 @@ void bulletUpdate(Bullet* bullet) {
       kill(bullet);
       return;
     }
-    if(!processCollisionWithInvaders(bullet)) {
+    bulletDraw(bullet);
+    /*if(!processCollisionWithInvaders(bullet)) {
       bulletDraw(bullet);
-    }
-    bullet->sprite.y -= BULLET_SPEED;
+    }*/
+    bullet->sprite.y += bullet->directionnalSpeed;
   } /*else if(bullet->exploding) {
       if(bullet->explosionTimer == 0) {
          //bullet->sprite.erase();
@@ -77,6 +62,18 @@ void shoot(Bullet * b, uint_fast8_t x, uint_fast8_t y) {
   b->sprite = ssd1306_createSprite(x, y, sizeof(shootSprite),  shootSprite);
   b->enabled = true;
   b->sprite.draw();
+}
+
+void updateFastBullet(Bullet *b) {
+  static bool usingSprite1 = true;
+  if(usingSprite1) {
+    b->sprite = ssd1306_createSprite(b->sprite.x, b->sprite.y, sizeof(bulletFast1),  bulletFast1);
+    usingSprite1 = true;
+  } else {
+    b->sprite = ssd1306_createSprite(b->sprite.x, b->sprite.y, sizeof(bulletFast2),  bulletFast2);
+    usingSprite1 = false;
+  }
+  bulletUpdate(b);
 }
 
 
