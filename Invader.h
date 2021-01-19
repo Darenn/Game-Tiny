@@ -7,7 +7,6 @@
 #include "bullet.h"
 #include "utils.h"
 
-
 #include "ssd1306.h"
 
 #define INVADER_WIDTH 8 // The width of an invader in pixels
@@ -35,6 +34,8 @@
 #define STARTING_TIME_BETWEEN_SHOTS_MAX 30 * 5 // in frame
 #define FAST_BULLET_SPEED 3
 
+#define getIndexByCoordinates(row, col) col + row * INVADERS_COLUMN_COUNT
+
 static int_fast8_t invaderDirection = 1; // 1 = right and -1 = left
 static int_fast8_t invaderRightStrafeCountLimit = INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT; // How many time invaders moves on X axis before going down
 static int_fast8_t invaderLeftStrafeCountLimit = 0; // How many time invaders moves on X axis before going down
@@ -48,9 +49,9 @@ typedef struct Invader {
   bool isDead = false;
 } Invader;
 
-Invader invaders [INVADERS_COUNT];
-Bullet bulletFast;
-Bullet bulletSlow;
+static Invader invaders [INVADERS_COUNT];
+static Bullet bulletFast;
+static Bullet bulletSlow;
 
 inline static uint_fast8_t getColumnWithInvaderIndex(uint_fast8_t index) {
   return index % INVADERS_COLUMN_COUNT;
@@ -70,7 +71,7 @@ inline static uint_fast8_t getPosY(uint_fast8_t idx,uint_fast8_t diveCounter = d
   return INVADER_STARTING_Y + getRowWithInvaderIndex(idx) * INVADER_Y_GAP + diveCounter * INVADER_DIVE_SPEED;
 }
 
-void killInvader(Invader *invader, uint_fast8_t i) {
+static void killInvader(Invader *const invader, uint_fast8_t i) {
   strafeInterval -= INVADERS_STRAFE_TIME_LOSS;
   invader->isDead = true;
   if(i>=INVADERS_COLUMN_COUNT) {
@@ -82,19 +83,13 @@ void killInvader(Invader *invader, uint_fast8_t i) {
   }
   uint_fast8_t x = getPosX(i);
   uint_fast8_t y = getPosY(i);
-  //clearRect(x, y, x+INVADER_WIDTH, y+INVADER_WIDTH);
-  //ssd1306_clearBlock(getPosX(i), getPosY(i), INVADER_WIDTH, INVADER_WIDTH);
-}
-
-inline static uint_fast8_t getIndexByCoordinates(uint_fast8_t row, uint_fast8_t col) {
-  return col + row * INVADERS_COLUMN_COUNT;
 }
 
 /*
  * Returns the first column (leftiest) with an invader still alive.
  * TODO can I optimize ny removing the return statement?
  */
-uint_fast8_t getFirstColumnWithAliveInvader() {
+static uint_fast8_t getFirstColumnWithAliveInvader() {
   for (uint_fast8_t col = 0; col < INVADERS_COLUMN_COUNT; ++col) {
     for (uint_fast8_t row = 0; row < INVADERS_ROW_COUNT; ++row) {
       if (!invaders[getIndexByCoordinates(row, col)].isDead) {
@@ -108,7 +103,7 @@ uint_fast8_t getFirstColumnWithAliveInvader() {
 /*
  * Returns the last row with an invader still alive.
  */
-uint_fast8_t getLastRowWithAliveInvader() {
+static uint_fast8_t getLastRowWithAliveInvader() {
   for (int_fast8_t i = INVADERS_COUNT - 1; i > 0; --i) {
     if (!invaders[i].isDead) {
         return i%INVADERS_COLUMN_COUNT;
@@ -121,7 +116,7 @@ uint_fast8_t getLastRowWithAliveInvader() {
 /*
  * Returns the last column (rightiest) with an invader still alive.
  */
-uint_fast8_t getLastColumnWithAliveInvader() {
+static uint_fast8_t getLastColumnWithAliveInvader() {
   for (int_fast8_t col = INVADERS_COLUMN_COUNT - 1; col > 0; --col) {
     for (uint_fast8_t row = 0; row < INVADERS_ROW_COUNT; ++row) {
       if (!invaders[getIndexByCoordinates(row, col)].isDead) {
@@ -242,6 +237,9 @@ static void invadersShoot() {
   updateFastBullet(&bulletFast);
 }
 
+/* does not benefit from this opti
+#define getInvaderRect(x, y) Rect{x, y, x + INVADER_WIDTH, y + INVADER_WIDTH}
+*/
 Rect getInvaderRect(int_fast8_t x, int_fast8_t y) {
   return Rect{x, y, x + INVADER_WIDTH, y + INVADER_WIDTH};
 }

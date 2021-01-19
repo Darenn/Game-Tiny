@@ -22,15 +22,13 @@
 #define DEBUG
 
 // 0 | 0 | PB5 | PB4 | PB3 | PB2 | PB1 | PB0
-#define SETUP_PINS DDRB |= 0b00011010 // set PB1 as output (for the speaker), PB0 and PB2 as input for buttons, PB4 and PB3 as output for screens
+#define SETUP_PINS() DDRB |= 0b00011010 // set PB1 as output (for the speaker), PB0 and PB2 as input for buttons, PB4 and PB3 as output for screens
 
 #define SCREEN_WIDTH 128 // OLED display width,  in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
 #define TIME_PER_FRAME 32 // in ms
 
-Player p;
-//Bullet theBullet;
 
 inline void drawIntro() {
   clearRect(0, 0, 127, 63); // clear screen
@@ -42,10 +40,15 @@ inline void drawIntro() {
   }
   ssd1306_printFixed_oldStyle(60, 29, "SPACE", STYLE_NORMAL);
   ssd1306_printFixed_oldStyle(65, 32, "INVADERS", STYLE_NORMAL);
-  beep(200,600);
-  beep(300,200);
-  beep(400,300);
-  delay(2000);
+  delay(1000);
+  note(4,3);
+  delay(200);
+  note(3,3);
+  delay(200);
+  note(2,3);
+  delay(200);
+  note(5,3);
+  delay(600);
   clearRect(0, 0, 127, 63); // clear screen
 }
 
@@ -53,34 +56,25 @@ void setup() {
   ssd1306_128x64_i2c_init();
   ssd1306_setFixedFont(ssd1306xled_font6x8);
   
-  SETUP_PINS;
+  SETUP_PINS();
 
   drawIntro();
   initInvaders();
-
-  /*theBullet.sprite = ssd1306_createSprite(0, 0, sizeof(shootSprite),  shootSprite);
-  theBullet.enabled = false;*/
   updateScore(0);
-
-  init_player(&p);
+  init_player();
 }
 
 void loop() {
   float startLoopTime = millis();  // Save time to get 30 FPS
   
   note(0, 0);
+  
   updateInputs();
-  playerUpdate(&p);
-  //bulletUpdate(&theBullet);
-
+  playerUpdate();
   invade();
   invadersShoot();
 
-  if (IS_A_BUTTON_PRESSED) {
-    
-  }
-
-  playerDraw(&p);
+  playerDraw();
   
   // Fix 30 FPS
   signed int timeToWait = (signed int)TIME_PER_FRAME - (millis() - startLoopTime);

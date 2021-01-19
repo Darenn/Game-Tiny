@@ -8,10 +8,8 @@
 #define SCORE_UFO_WEAK 50
 #define SCORE_UFO_STRONG 300
 
-
-static uint_fast16_t score = 0;
-
 void updateScore(uint_fast8_t toAdd) {
+  static uint_fast16_t score = 0;
   score += toAdd;
   ssd1306_printFixed_oldStyle(0, 0, "SCORE:", STYLE_NORMAL);
   char tempStr[6] = {0};
