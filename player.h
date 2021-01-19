@@ -41,34 +41,28 @@ void playerDraw(Player *const p) {
 }
 
 static void playerMove(Player *const p) {
-  if (IS_RIGHT_PAD_PRESSED) {
+  if (IS_RIGHT_PAD_PRESSED || IS_DOWN_PAD_PRESSED) {
     p->sprite.x += PLAYER_SPEED;
-  } else if (IS_DOWN_PAD_PRESSED) {
-    p->sprite.x += PLAYER_SPEED;
-  } else if (IS_LEFT_PAD_PRESSED) {
-    p->sprite.x -= PLAYER_SPEED;
-  } else if (IS_UP_PAD_PRESSED) {
+  } else if (IS_LEFT_PAD_PRESSED || IS_UP_PAD_PRESSED) {
     p->sprite.x -= PLAYER_SPEED;
   }
 }
 
 static void playerShoot(Player *const p) {
   static unsigned long lastShootTime = 0;
-  static bool cooldownOver = true;
-  if(!cooldownOver && millis() - lastShootTime >= PLAYER_SHOOT_COOLDOWN) {
+  //static bool cooldownOver = true;
+  /*if(!cooldownOver && millis() - lastShootTime >= PLAYER_SHOOT_COOLDOWN) {
     p->sprite = ssd1306_createSprite(p->sprite.x, p->sprite.y, sizeof(playerBMP),  playerBMP);
     p->sprite.draw();
     cooldownOver = true;
-  }
-
-  if (cooldownOver && IS_A_BUTTON_PRESSED) {
+  }*/
+  if (IS_A_BUTTON_PRESSED && millis() - lastShootTime >= PLAYER_SHOOT_COOLDOWN) {
       lastShootTime = millis();
-      p->sprite = ssd1306_createSprite(p->sprite.x, p->sprite.y, sizeof(playerShot),  playerShot);
+      p->sprite = ssd1306_createSprite(p->sprite.x, p->sprite.y, sizeof(playerBMP),  playerBMP);
       shoot(&p->bullet, p->sprite.x + 4, p->sprite.y - 4);
       note(7,4);
-      cooldownOver = false;
+      //cooldownOver = false;
     }
-  
   if (IS_B_BUTTON_PRESSED) {
     p->sprite.x = START_POS_X;
     p->sprite.y = START_POS_Y;

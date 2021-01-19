@@ -226,14 +226,14 @@ uint_fast8_t getLastRowWithAliveInvaderOnColumn(uint_fast8_t col) {
 static void invadersShoot() {
   static uint_fast8_t timeBetweenShotsMin = STARTING_TIME_BETWEEN_SHOTS_MIN;
   static uint_fast8_t timeBetweenShotsMax = STARTING_TIME_BETWEEN_SHOTS_MIN;
-  static uint_fast8_t timeUntilNestShot = GTRandom(timeBetweenShotsMin, timeBetweenShotsMax);
+  static uint_fast8_t timeUntilNestShot = GT_RANDOM_RANGE(timeBetweenShotsMin, timeBetweenShotsMax);
   static uint_fast8_t shotTimer = 0;
 
   ++shotTimer;
   if(shotTimer >= timeUntilNestShot) {
     shotTimer = 0;
-    timeUntilNestShot = GTRandom(timeBetweenShotsMin, timeBetweenShotsMax);
-    uint_fast8_t col = GTRandom(getFirstColumnWithAliveInvader(), getLastColumnWithAliveInvader());
+    timeUntilNestShot = GT_RANDOM_RANGE(timeBetweenShotsMin, timeBetweenShotsMax);
+    uint_fast8_t col = GT_RANDOM_RANGE(getFirstColumnWithAliveInvader(), getLastColumnWithAliveInvader());
     uint_fast8_t row = getLastRowWithAliveInvaderOnColumn(col);
     uint_fast8_t index = getIndexByCoordinates(row, col);
     shoot(&bulletFast, getPosX(index)+ INVADER_WIDTH/2, getPosY(index) + INVADER_WIDTH);
