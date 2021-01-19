@@ -15,8 +15,6 @@ typedef struct Bullet {
   //bool exploding = false;
 } Bullet;
 
-
-// TODO optimized using only one get rect function?
 Rect getBulletRect(Bullet *b) {
   return Rect{b->sprite.x, b->sprite.y, b->sprite.x + 8, b->sprite.y + 8};
 }
@@ -37,6 +35,7 @@ void bulletDraw(Bullet* b) {
 }
 
 void bulletUpdate(Bullet* bullet) {
+  
   if (bullet->enabled) {
     if(bullet->sprite.y >= 60 || bullet->sprite.y <= 10) {
       kill(bullet);
@@ -65,14 +64,15 @@ void shoot(Bullet * b, uint_fast8_t x, uint_fast8_t y) {
 }
 
 void updateFastBullet(Bullet *b) {
-  static bool usingSprite1 = true;
-  if(usingSprite1) {
+  static bool usingSprite2 = false;
+  if(usingSprite2) {
     b->sprite = ssd1306_createSprite(b->sprite.x, b->sprite.y, sizeof(bulletFast1),  bulletFast1);
-    usingSprite1 = true;
+    //usingSprite2 = true;
   } else {
     b->sprite = ssd1306_createSprite(b->sprite.x, b->sprite.y, sizeof(bulletFast2),  bulletFast2);
-    usingSprite1 = false;
+    //usingSprite2 = false;
   }
+  usingSprite2 = !usingSprite2;
   bulletUpdate(b);
 }
 

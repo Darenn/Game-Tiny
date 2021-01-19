@@ -41,8 +41,8 @@ static int_fast8_t invaderRightStrafeCountLimit = INVADER_STARTING_RIGHT_STRAFE_
 static int_fast8_t invaderLeftStrafeCountLimit = 0; // How many time invaders moves on X axis before going down
 static int_fast8_t strafeCounter = 0; // How much time we have strafed so far, can be negative if moving on left
 static uint_fast8_t diveCounter = 0; // How much time we have dived so far
-static int_fast8_t strafeCounterOld = 0; // How much time we have strafed so far, can be negative if moving on left
-static uint_fast8_t diveCounterOld = 0; // How much time we have dived so far
+//static int_fast8_t strafeCounterOld = 0; // How much time we have strafed so far, can be negative if moving on left
+//static uint_fast8_t diveCounterOld = 0; // How much time we have dived so far
 static unsigned long strafeInterval = INVADERS_STARTING_STRAFE_TIME; // interval of time between each strafe action in ms
 
 typedef struct Invader {
@@ -167,8 +167,8 @@ void drawInvader(Invader* i, uint_fast8_t index, uint_fast8_t strafeCounter, uin
    Should be called only when they move to avoid flickering.
 */
 static inline drawInvaders() {
-  int posX = getPosX(0, strafeCounterOld);
-  int posY = getPosY(0, diveCounterOld);
+  //int posX = getPosX(0, strafeCounterOld);
+  //int posY = getPosY(0, diveCounterOld);
   //int posX1 = posX + INVADERS_COLUMN_COUNT*INVADER_X_GAP;
   //int posY2 = posY + INVADERS_ROW_COUNT*INVADER_Y_GAP;
   clearRect(0, 8, 127, 50);
@@ -191,11 +191,11 @@ static void invade() {
 #define ld_arrivedOnRight invaderDirection == 1 && strafeCounter >= invaderRightStrafeCountLimit
 #define ld_arrivedOnLeft invaderDirection == -1 && strafeCounter <= invaderLeftStrafeCountLimit
     if (ld_arrivedOnRight || ld_arrivedOnLeft) { // DIVE
-      diveCounterOld = diveCounter;
+      //diveCounterOld = diveCounter;
       ++diveCounter;
       invaderDirection = -invaderDirection;
     } else {
-      strafeCounterOld = strafeCounter;
+      //strafeCounterOld = strafeCounter;
       if (invaderDirection == -1) {    
         --strafeCounter;
       } else {
@@ -221,19 +221,22 @@ uint_fast8_t getLastRowWithAliveInvaderOnColumn(uint_fast8_t col) {
 static void invadersShoot() {
   static uint_fast8_t timeBetweenShotsMin = STARTING_TIME_BETWEEN_SHOTS_MIN;
   static uint_fast8_t timeBetweenShotsMax = STARTING_TIME_BETWEEN_SHOTS_MIN;
-  static uint_fast8_t timeUntilNestShot = GT_RANDOM_RANGE(timeBetweenShotsMin, timeBetweenShotsMax);
+  static uint_fast8_t timeUntilNextShot = GT_RANDOM_RANGE(timeBetweenShotsMin, timeBetweenShotsMax);
   static uint_fast8_t shotTimer = 0;
 
   ++shotTimer;
-  if(shotTimer >= timeUntilNestShot) {
+  if(shotTimer >= timeUntilNextShot) {
     shotTimer = 0;
-    timeUntilNestShot = GT_RANDOM_RANGE(timeBetweenShotsMin, timeBetweenShotsMax);
-    uint_fast8_t col = GT_RANDOM_RANGE(getFirstColumnWithAliveInvader(), getLastColumnWithAliveInvader());
-    uint_fast8_t row = getLastRowWithAliveInvaderOnColumn(col);
-    uint_fast8_t index = getIndexByCoordinates(row, col);
+    timeUntilNextShot = GT_RANDOM_RANGE(timeBetweenShotsMin, timeBetweenShotsMax);
+    /* HEre the define adds bytes
+     * #define ld_col GT_RANDOM_RANGE(getFirstColumnWithAliveInvader(), getLastColumnWithAliveInvader())
+    #define ld_row getLastRowWithAliveInvaderOnColumn(ld_col)
+    #define ld_index getIndexByCoordinates(ld_row, ld_col)*/
+    const uint_fast8_t col = GT_RANDOM_RANGE(getFirstColumnWithAliveInvader(), getLastColumnWithAliveInvader());
+    const uint_fast8_t row = getLastRowWithAliveInvaderOnColumn(col);
+    const uint_fast8_t index = getIndexByCoordinates(row, col);
     shoot(&bulletFast, getPosX(index)+ INVADER_WIDTH/2, getPosY(index) + INVADER_WIDTH);
   }
-
   updateFastBullet(&bulletFast);
 }
 
