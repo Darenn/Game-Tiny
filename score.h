@@ -13,7 +13,6 @@ void updateScore(uint_fast8_t toAdd) {
   score += toAdd;
   ssd1306_printFixed_oldStyle(0, 0, "SCORE:", STYLE_NORMAL);
   char tempStr[6] = {0};
-  utoa(score, tempStr, 10);
   ssd1306_printFixed_oldStyle(40, 0, tempStr, STYLE_NORMAL);
 }
 

@@ -1,4 +1,3 @@
-#ifdef DEBUG
 #ifndef DEBUG_H
 #define DEBUG_H
 
@@ -47,5 +46,4 @@ int freeMemory() {
 #endif  // __arm__
 }
 
-#endif
 #endif

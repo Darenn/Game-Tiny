@@ -32,11 +32,15 @@
 inline void drawIntro() {
   clearRect(0, 0, 127, 63); // clear screen
   delay(500);
-  for (int8_t y=-24; y<16; y++)
-  {     
-      gfx_drawMonoBitmap(16, y, 40, 32, gameTinyLogo);
+  unsigned char gameTinyLogo [160];
+  eeprom_read_block(gameTinyLogo, LOGO_EEPROM_ADDR, 160);
+  /*for (int8_t y=-24; y<16; y++)
+  {   
+      ssd1306_drawBuffer(16, y, 40, 32, gameTinyLogo); 
       delay(25);
-  }
+      clearRect(16, y, 40, 63); // clear screen
+  }*/
+  ssd1306_drawBuffer(16, 16, 40, 32, gameTinyLogo);
   ssd1306_printFixed_oldStyle(60, 29, "SPACE", STYLE_NORMAL);
   ssd1306_printFixed_oldStyle(65, 32, "INVADERS", STYLE_NORMAL);
   delay(1000);
