@@ -15,11 +15,11 @@
 #define INVADER_STARTING_Y 8 // The gap between two rows
 #define INVADER_STRAFE_SPEED 2 // in pixel per strafe, how much pixels we go on the X axis at each strafe
 #define INVADER_DIVE_SPEED 8 // In pixel per dive, how much pixels we go down at each dive
-#define INVADERS_COLUMN_COUNT 9 // How much column on the invader matrix (how much invaders on one row)
+#define INVADERS_COLUMN_COUNT 4 // How much column on the invader matrix (how much invaders on one row)
 #define INVADERS_ROW_COUNT 4 // How much rows on the invader matrix
 #define INVADERS_COUNT INVADERS_COLUMN_COUNT * INVADERS_ROW_COUNT // Total count of invaders
 
-#define INVADERS_STARTING_STRAFE_TIME 2750 //3000
+#define INVADERS_STARTING_STRAFE_TIME 500 //2750 //3000
 #define INVADERS_STRAFE_TIME_LOSS 75
 #define INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT 19 // How much time invaders will strafe to the right at start.
 #define INVADER_STARTING_LEFT_STRAFE_COUNT_LIMIT 0 // How much time invaders will strafe to the left at start.
@@ -36,11 +36,12 @@
 
 #define getIndexByCoordinates(row, col) col + row * INVADERS_COLUMN_COUNT
 
+
 static int_fast8_t invaderDirection = 1; // 1 = right and -1 = left
 static int_fast8_t invaderRightStrafeCountLimit = INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT; // How many time invaders moves on X axis before going down
 static int_fast8_t invaderLeftStrafeCountLimit = 0; // How many time invaders moves on X axis before going down
 static int_fast8_t strafeCounter = 0; // How much time we have strafed so far, can be negative if moving on left
-static uint_fast8_t diveCounter = 0; // How much time we have dived so far
+uint_fast8_t diveCounter = 0; // How much time we have dived so far
 //static int_fast8_t strafeCounterOld = 0; // How much time we have strafed so far, can be negative if moving on left
 //static uint_fast8_t diveCounterOld = 0; // How much time we have dived so far
 static unsigned long strafeInterval = INVADERS_STARTING_STRAFE_TIME; // interval of time between each strafe action in ms
@@ -228,10 +229,6 @@ static void invadersShoot() {
   if(shotTimer >= timeUntilNextShot) {
     shotTimer = 0;
     timeUntilNextShot = GT_RANDOM_RANGE(timeBetweenShotsMin, timeBetweenShotsMax);
-    /* HEre the define adds bytes
-     * #define ld_col GT_RANDOM_RANGE(getFirstColumnWithAliveInvader(), getLastColumnWithAliveInvader())
-    #define ld_row getLastRowWithAliveInvaderOnColumn(ld_col)
-    #define ld_index getIndexByCoordinates(ld_row, ld_col)*/
     const uint_fast8_t col = GT_RANDOM_RANGE(getFirstColumnWithAliveInvader(), getLastColumnWithAliveInvader());
     const uint_fast8_t row = getLastRowWithAliveInvaderOnColumn(col);
     const uint_fast8_t index = getIndexByCoordinates(row, col);

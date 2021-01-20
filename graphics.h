@@ -3,6 +3,9 @@
 
 #include "intf/ssd1306_interface.h"
 
+
+#define CLEAR_SCREEN() clearRect(0, 0, 127, 63)
+
 /*
  * Coordinates start at 0, please do not overflow with x2 and y2.
  */
@@ -153,5 +156,22 @@ const PROGMEM uint8_t explosion[] =
   0B00100100,
   0B01000010,
   0B10000001
+};
+
+const PROGMEM uint8_t ufoBMP[] =
+{
+  0B00100000,
+  0B00110000,
+  0B01111000,
+  0B11101000,
+  0B01111000,
+  0B00101000, 
+  0B01111000, 
+  0B00101000,
+  0B01111000,
+  0B11101000,
+  0B01111000,
+  0B00110000,
+  0B00100000,
 };
 #endif

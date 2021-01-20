@@ -17,6 +17,7 @@
 #include "physics.h"
 #include "bullet.h"
 #include "score.h"
+#include "ufo.h"
 
 #define DEBUG
 
@@ -30,17 +31,17 @@
 
 
 inline void drawIntro() {
-  clearRect(0, 0, 127, 63); // clear screen
+  CLEAR_SCREEN();
   delay(500);
   unsigned char gameTinyLogo [160];
   eeprom_read_block(gameTinyLogo, LOGO_EEPROM_ADDR, 160);
-  /*for (int8_t y=-24; y<16; y++)
+  for (int8_t y=-24; y<16; y++)
   {   
       ssd1306_drawBuffer(16, y, 40, 32, gameTinyLogo); 
       delay(25);
-      clearRect(16, y, 40, 63); // clear screen
-  }*/
-  ssd1306_drawBuffer(16, 16, 40, 32, gameTinyLogo);
+      CLEAR_SCREEN();
+  }
+  //ssd1306_drawBuffer(16, 16, 40, 32, gameTinyLogo);
   ssd1306_printFixed_oldStyle(60, 29, "SPACE", STYLE_NORMAL);
   ssd1306_printFixed_oldStyle(65, 32, "INVADERS", STYLE_NORMAL);
   delay(1000);
@@ -52,7 +53,7 @@ inline void drawIntro() {
   delay(200);
   note(5,3);
   delay(600);
-  clearRect(0, 0, 127, 63); // clear screen
+  CLEAR_SCREEN();
 }
 
 void setup() {
@@ -76,6 +77,7 @@ void loop() {
   playerUpdate();
   invade();
   invadersShoot();
+  updateUFO();
 
   playerDraw();
   
