@@ -11,7 +11,7 @@
 #define PLAYER_HEIGHT 3
 #define START_POS_X 64 - PLAYER_WIDTH/2
 #define START_POS_Y 56
-#define PLAYER_SHOOT_COOLDOWN 700 //in ms
+#define PLAYER_SHOOT_COOLDOWN 600 //in ms
 #define PLAYER_SPEED 2 // pixel per frame
 
 typedef struct Player {
