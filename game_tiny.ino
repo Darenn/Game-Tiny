@@ -18,7 +18,7 @@
 #include "bullet.h"
 #include "score.h"
 #include "ufo.h"
-
+#include"gametiny_font.h"
 #define DEBUG
 
 // 0 | 0 | PB5 | PB4 | PB3 | PB2 | PB1 | PB0
@@ -35,31 +35,31 @@ inline void drawIntro() {
   delay(500);
   unsigned char gameTinyLogo [160];
   eeprom_read_block(gameTinyLogo, LOGO_EEPROM_ADDR, 160);
-  for (int8_t y=-24; y<16; y++)
-  {   
-      ssd1306_drawBuffer(16, y, 40, 32, gameTinyLogo); 
-      delay(25);
-      CLEAR_SCREEN();
+  for (int8_t y = -24; y < 16; y++)
+  {
+    ssd1306_drawBuffer(16, y, 40, 32, gameTinyLogo);
+    delay(25);
+    CLEAR_SCREEN();
   }
   //ssd1306_drawBuffer(16, 16, 40, 32, gameTinyLogo);
   ssd1306_printFixed_oldStyle(60, 29, "SPACE", STYLE_NORMAL);
   ssd1306_printFixed_oldStyle(65, 32, "INVADERS", STYLE_NORMAL);
   delay(1000);
-  note(4,3);
+  note(4, 3);
   delay(200);
-  note(3,3);
+  note(3, 3);
   delay(200);
-  note(2,3);
+  note(2, 3);
   delay(200);
-  note(5,3);
+  note(5, 3);
   delay(600);
   CLEAR_SCREEN();
 }
 
 void setup() {
   ssd1306_128x64_i2c_init();
-  ssd1306_setFixedFont(ssd1306xled_font6x8);
-  
+  ssd1306_setFixedFont(TinyFont4x6);
+
   SETUP_PINS();
 
   drawIntro();
@@ -70,9 +70,9 @@ void setup() {
 
 void loop() {
   float startLoopTime = millis();  // Save time to get 30 FPS
-  
+
   note(0, 0);
-  
+
   updateInputs();
   playerUpdate();
   invade();
@@ -80,7 +80,7 @@ void loop() {
   updateUFO();
 
   playerDraw();
-  
+
   // Fix 30 FPS
   signed int timeToWait = (signed int)TIME_PER_FRAME - (millis() - startLoopTime);
   if (timeToWait >= 0 && timeToWait < 33) {
@@ -95,7 +95,7 @@ void loop() {
   //debugDisplayInt(PINB & 0b00000001, 0, 50);
   //debugDisplayInt(sizeof(Invader), 0, 50);
   //debugDisplayInt(freeMemory(), 0, 50);
-  
+
   //uint_fast16_t padPinValue = analogRead(PIN_DPAD);
   //debugDisplayInt(padPinValue, 40, 0);
   //debugDisplayInt(digitalRead(PIN_BUTTON_A), 70, 0);
