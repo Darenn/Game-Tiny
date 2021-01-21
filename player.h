@@ -58,7 +58,7 @@ static void playerShoot() {
     p.sprite.draw();
     cooldownOver = true;
   }*/
-  if (IS_A_BUTTON_PRESSED && millis() - lastShootTime >= PLAYER_SHOOT_COOLDOWN) {
+  if ( IS_A_BUTTON_PRESSED && ((millis() - lastShootTime) >= PLAYER_SHOOT_COOLDOWN) ) {
       lastShootTime = millis();
       p.sprite = ssd1306_createSprite(p.sprite.x, p.sprite.y, sizeof(playerBMP),  playerBMP);
       shoot(&p.bullet, p.sprite.x + 4, p.sprite.y - 4);

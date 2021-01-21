@@ -85,10 +85,8 @@ static void killInvader(Invader *const invader, uint_fast8_t i) {
   } else {
     updateScore(30);
   }
-  uint_fast8_t x = getPosX(i);
-  uint_fast8_t y = getPosY(i);
   if (++deadInvaders >= INVADERS_COUNT) {
-    // call win screen
+    // TODO call win screen
     // for now just reset
     note(0,0);
     delay(1000);
@@ -154,37 +152,36 @@ inline static void compensateDead() {
   invaderLeftStrafeCountLimit = INVADER_STARTING_LEFT_STRAFE_COUNT_LIMIT - LEFT_COMPENSATION;
 }
 
-void drawInvader(Invader* i, uint_fast8_t index, uint_fast8_t strafeCounter, uint_fast8_t diveCounter) {
-  SPRITE s;
+void drawInvader(uint_fast8_t index, uint_fast8_t strafeCounter, uint_fast8_t diveCounter) {
+  const uint8_t *spriteToDisplay;
   if (index >= INVADERS_COLUMN_COUNT * 2) {
-
-    if (strafeCounter % 2 != 0) {
-      s = ssd1306_createSprite(getPosX(index), getPosY(index), sizeof(invaderGhostMove), invaderGhostMove);
+    if (strafeCounter&1) {
+      spriteToDisplay = invaderGhostMove;
     } else {
-      s = ssd1306_createSprite(getPosX(index), getPosY(index), sizeof(invaderGhostIdle), invaderGhostIdle);
+      spriteToDisplay = invaderGhostIdle;
     }
   }
   else if (index >= INVADERS_COLUMN_COUNT) {
-    if (strafeCounter % 2 != 0) {
-      s = ssd1306_createSprite(getPosX(index), getPosY(index, diveCounter), sizeof(invaderPoulpeMove), invaderPoulpeMove);
+    if (strafeCounter&1) {
+      spriteToDisplay = invaderPoulpeMove;
     } else {
-      s = ssd1306_createSprite(getPosX(index), getPosY(index), sizeof(invaderPoulpeIdle), invaderPoulpeIdle);
+      spriteToDisplay = invaderPoulpeIdle;
     }
   } else {
-    if (strafeCounter % 2 != 0) {
-      s = ssd1306_createSprite(getPosX(index), getPosY(index, diveCounter), sizeof(invaderAlienMove), invaderAlienMove);
+    if (strafeCounter&1) {
+      spriteToDisplay = invaderAlienMove;
     } else {
-      s = ssd1306_createSprite(getPosX(index), getPosY(index, diveCounter), sizeof(invaderAlienIdle), invaderAlienIdle);
+      spriteToDisplay = invaderAlienIdle;
     }
   }
-
-  ssd1306_drawSprite(&s);
+  SPRITE s = ssd1306_createSprite(getPosX(index), getPosY(index, diveCounter), INVADER_WIDTH, spriteToDisplay);
+  s.draw();
 }
 
 /*
    Should be called only when they move to avoid flickering.
 */
-static inline drawInvaders() {
+static inline void drawInvaders() {
   //int posX = getPosX(0, strafeCounterOld);
   //int posY = getPosY(0, diveCounterOld);
   //int posX1 = posX + INVADERS_COLUMN_COUNT*INVADER_X_GAP;
@@ -192,22 +189,21 @@ static inline drawInvaders() {
   clearRect(0, 8, 127, 50);
   for (int_fast8_t i = INVADERS_COUNT - 1; i >= 0; i--) {
     if (!invaders[i].isDead) {
-      drawInvader(&invaders[i], i, strafeCounter, diveCounter);
+      drawInvader(i, strafeCounter, diveCounter);
     }
   }
 }
 
 static void invade() {
   static unsigned long lastStrafeTime = 0;  // the last time we strafed in ms
-  static uint_fast8_t diveSpeed = 3; // How much pixel should go down when diving
   static uint_fast8_t noteCounter = 4;
 
   if (millis() - lastStrafeTime > strafeInterval) {
     if (noteCounter <= 0) noteCounter = 4;
     note (--noteCounter, 3);
     lastStrafeTime = millis();
-#define ld_arrivedOnRight invaderDirection == 1 && strafeCounter >= invaderRightStrafeCountLimit
-#define ld_arrivedOnLeft invaderDirection == -1 && strafeCounter <= invaderLeftStrafeCountLimit
+#define ld_arrivedOnRight (invaderDirection == 1) && (strafeCounter >= invaderRightStrafeCountLimit)
+#define ld_arrivedOnLeft (invaderDirection == -1) && (strafeCounter <= invaderLeftStrafeCountLimit)
     if (ld_arrivedOnRight || ld_arrivedOnLeft) { // DIVE
       //diveCounterOld = diveCounter;
       ++diveCounter;
@@ -265,7 +261,7 @@ void initInvaders() {
   for (uint_fast8_t y = 0; y < INVADERS_ROW_COUNT; ++y) {
     for (uint_fast8_t x = 0; x < INVADERS_COLUMN_COUNT; ++x) {
       invaders[x + y * INVADERS_COLUMN_COUNT] = Invader();
-      drawInvader(&invaders[x + y * INVADERS_COLUMN_COUNT], x + y * INVADERS_COLUMN_COUNT , 0, 0);
+      drawInvader(x + y * INVADERS_COLUMN_COUNT , 0, 0);
     }
   }
   bulletFast.sprite = ssd1306_createSprite(0, 0, sizeof(bulletFast1), bulletFast1);

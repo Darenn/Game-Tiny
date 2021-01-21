@@ -43,7 +43,9 @@ static bool processCollisionWithUFO() {
     kill(&p.bullet);
     killUFO();
     updateScore(SCORE_UFO_STRONG);
+    return true;
   }
+  return false;
 }
 
 void updateUFO() {
