@@ -44,7 +44,9 @@ inline void drawIntro() {
   //ssd1306_drawBuffer(16, 16, 40, 32, gameTinyLogo);
   ssd1306_printFixed_oldStyle(60, 29, "SPACE", STYLE_NORMAL);
   ssd1306_printFixed_oldStyle(65, 32, "INVADERS", STYLE_NORMAL);
-  delay(1000);
+  //myMelody(snd_intro, 5);
+  melody(snd_intro);
+  /*delay(1000);
   note(4, 3);
   delay(200);
   note(3, 3);
@@ -52,7 +54,7 @@ inline void drawIntro() {
   note(2, 3);
   delay(200);
   note(5, 3);
-  delay(600);
+  delay(600);*/
   CLEAR_SCREEN();
 }
 
@@ -71,7 +73,7 @@ void setup() {
 void loop() {
   float startLoopTime = millis();  // Save time to get 30 FPS
 
-  note(0, 0);
+// TODO  note(0, 0);
 
   updateInputs();
   playerUpdate();

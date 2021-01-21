@@ -62,7 +62,7 @@ static void playerShoot() {
       lastShootTime = millis();
       p.sprite = ssd1306_createSprite(p.sprite.x, p.sprite.y, sizeof(playerBMP),  playerBMP);
       shoot(&p.bullet, p.sprite.x + 4, p.sprite.y - 4);
-      note(7,4);
+      // TODO note(7,4);
       //cooldownOver = false;
     }
   if (IS_B_BUTTON_PRESSED) {
@@ -73,7 +73,7 @@ static void playerShoot() {
 
 
 static bool processCollisionWithInvaders(Bullet *theBullet) {
-  for (uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) {
+  for (uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) { 
       uint_fast8_t x = getPosX(i);
       uint_fast8_t y = getPosY(i);   
       if (!invaders[i].isDead && isColliding(getBulletRect(theBullet), getInvaderRect(x, y))) {
@@ -90,7 +90,7 @@ static bool processCollisionWithInvaders(Bullet *theBullet) {
 }
 
 void playPlayerExplosionSound() {
-  note(4,1);
+  /*note(4,1);
   delay(100);
   note(3,1);
   delay(100);
@@ -108,8 +108,9 @@ void playPlayerExplosionSound() {
   delay(400);
   note(1,1);
   delay(500);
-  note(0,0);
-  //melody(snd_PlayerExplosion);
+  note(0,0);*/
+  //myMelody(snd_PlayerExplosion, 10);
+  melody(snd_PlayerExplosion);
 }
 
 

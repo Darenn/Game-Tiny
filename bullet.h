@@ -26,7 +26,7 @@ void kill(Bullet *bullet) {
   bullet->sprite.erase();
   bullet->sprite = ssd1306_createSprite(bullet->sprite.x, bullet->sprite.y, sizeof(explosion),  explosion);
   bullet->sprite.draw();
-  note(1,1);
+// TODO  note(1,1);
 }
 
 void bulletDraw(Bullet* b) {

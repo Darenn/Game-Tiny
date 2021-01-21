@@ -88,7 +88,7 @@ static void killInvader(Invader *const invader, uint_fast8_t i) {
   if (++deadInvaders >= INVADERS_COUNT) {
     // TODO call win screen
     // for now just reset
-    note(0,0);
+    // TODO note(0,0);
     delay(1000);
     (( fn_t ) ( 0x0000 ))();
     /*do
@@ -200,7 +200,7 @@ static void invade() {
 
   if (millis() - lastStrafeTime > strafeInterval) {
     if (noteCounter <= 0) noteCounter = 4;
-    note (--noteCounter, 3);
+    // TODO note (--noteCounter, 3);
     lastStrafeTime = millis();
 #define ld_arrivedOnRight (invaderDirection == 1) && (strafeCounter >= invaderRightStrafeCountLimit)
 #define ld_arrivedOnLeft (invaderDirection == -1) && (strafeCounter <= invaderLeftStrafeCountLimit)
