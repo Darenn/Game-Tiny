@@ -8,58 +8,40 @@ const int Clock = ((F_CPU / 1000000UL) == 16) ? 4 : ((F_CPU / 1000000UL) == 8) ?
 const uint8_t scale[] PROGMEM = {239, 226, 213, 201, 190, 179, 169, 160, 151, 142, 134, 127};
 
 
-// http://www.technoblogy.com/show?20MO
 
-/*void note (int n, int octave) {
-  int prescaler = 8 + Clock - (octave + n / 12);
-  if (prescaler < 1 || prescaler > 15 || octave == 0) prescaler = 0;
-  DDRB = (DDRB & ~(1 << PIN_BUZZER)) | (prescaler != 0) << PIN_BUZZER;
-  OCR1C = pgm_read_byte(&scale[n % 12]) - 1;
-  GTCCR = (PIN_BUZZER == 4) << COM1B0;
-  TCCR1 = 1 << CTC1 | (PIN_BUZZER == 1) << COM1A0 | prescaler << CS10;
-}*/
+typedef struct Note {
+  uint8_t note:4;
+  uint8_t octave:3;
+  uint8_t duration;
+} Note;
 
-void myMelody(const uint8_t* melody, uint8_t count){//can make a while note and octave = 0
-  for(uint_fast8_t i = 0; i < count*3; i+=3) {
-    int n      = melody[i];
-    int octave = melody[i+1];
-
-    int prescaler = 8 + Clock - (octave + n / 12);
-    if (prescaler < 1 || prescaler > 15 || octave == 0) prescaler = 0;
-    DDRB = (DDRB & ~(1 << PIN_BUZZER)) | (prescaler != 0) << PIN_BUZZER;
-    OCR1C = pgm_read_byte(&scale[n % 12]) - 1;
-    GTCCR = (PIN_BUZZER == 4) << COM1B0;
-    TCCR1 = 1 << CTC1 | (PIN_BUZZER == 1) << COM1A0 | prescaler << CS10;
-
-    delay(melody[i+2]*100);
-  } 
-}
-
-void melody(const uint8_t* melody)
+/*
+ * Inspired by http://www.technoblogy.com/show?20MO and rewritten and upgraded by Thierry Costa and Darenn Keller
+ */
+void melody(const Note* melody)
 {
   while (true)
   {
-    uint8_t n      = *melody++;
-    uint8_t octave = *melody++;
+    const uint_fast8_t n      = melody->note;
+    const uint_fast8_t octave = melody->octave;
 
-    uint8_t prescaler = 8 + Clock - (octave + n / 12);
+    uint_fast8_t prescaler = 8 + Clock - (octave + n / 12);
     if ((prescaler & 0xf0) || octave == 0) prescaler = 0;
     DDRB = (DDRB & ~(1 << PIN_BUZZER)) | (prescaler != 0) << PIN_BUZZER;
     OCR1C = pgm_read_byte(&scale[n % 12]) - 1;
     GTCCR = (PIN_BUZZER == 4) << COM1B0;
     TCCR1 = (1 << CTC1) | ((PIN_BUZZER == 1) << COM1A0) | (prescaler << CS10);
 
-    if (!(n|octave))
+    const uint_fast8_t duration  = melody++->duration; 
+    if (!(n|octave|duration))
     {
       return; 
-    }
-
-    int duration  = (int)(*melody++) * 100;
-    delay(duration);
+    } 
+    delay(duration * 100);
   }
 }
 
-const uint8_t snd_PlayerExplosion[] = { /* note, octave, delay/100 */ 4,1,1, 3,1,1, 4,1,1 , 3,1,1, 2,1,1, 3,1,2, 2,1,3, 1,1,4, 1,1,5, 0,0};
-const uint8_t snd_intro[] PROGMEM = {4,3,2, 3,3,2, 2,3,2, 5,3,6, 0,0,0};
+const Note snd_playerExplosion[] = { Note{4,1,1}, Note{3,1,1}, Note{4,1,1} , Note{3,1,1}, Note{2,1,1}, Note{3,1,2}, Note{2,1,3}, Note{1,1,4}, Note{1,1,5}, Note{0,0,0}};
+const Note snd_intro[] = {Note{4,3,2}, Note{3,3,2}, Note{2,3,2}, Note{5,3,6}, Note{0,0,0}};
 
 #endif
