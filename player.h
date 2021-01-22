@@ -5,6 +5,7 @@
 #include "ssd1306.h"
 #include "bullet.h"
 #include "invader.h"
+#include "shelters.h"
 
 
 #define PLAYER_WIDTH 7
@@ -60,7 +61,7 @@ static void playerShoot() {
   }*/
   if ( IS_A_BUTTON_PRESSED && ((millis() - lastShootTime) >= PLAYER_SHOOT_COOLDOWN) ) {
       lastShootTime = millis();
-      p.sprite = ssd1306_createSprite(p.sprite.x, p.sprite.y, sizeof(playerBMP),  playerBMP);
+      //p.sprite = ssd1306_createSprite(p.sprite.x, p.sprite.y, sizeof(playerBMP),  playerBMP);
       shoot(&p.bullet, p.sprite.x + 4, p.sprite.y - 4);
       // TODO note(7,4);
       //cooldownOver = false;
@@ -90,27 +91,7 @@ static bool processCollisionWithInvaders(Bullet *theBullet) {
 }
 
 void playPlayerExplosionSound() {
-  /*note(4,1);
-  delay(100);
-  note(3,1);
-  delay(100);
-  note(4,1);
-  delay(100);
-  note(3,1);
-  delay(100);
-  note(2,1);
-  delay(100);
-  note(3,1);
-  delay(200);
-  note(2,1);
-  delay(300);
-  note(1,1);
-  delay(400);
-  note(1,1);
-  delay(500);
-  note(0,0);*/
-  //myMelody(snd_PlayerExplosion, 10);
-  // TODO melody(snd_PlayerExplosion);
+  melody(snd_playerExplosion);
 }
 
 
@@ -143,7 +124,9 @@ static bool processCollisionWithPlayer(Bullet *theBullet) {
 void playerUpdate() {
   processCollisionWithInvaders(&p.bullet);
   if(bulletFast.enabled) {
-    processCollisionWithPlayer(&bulletFast);
+    if(!processCollisionWithShelters(&bulletFast)) {
+       processCollisionWithPlayer(&bulletFast);
+    }
   }
   playerMove();
   playerShoot();

@@ -35,16 +35,16 @@ inline void drawIntro() {
   delay(500);
   unsigned char gameTinyLogo [160];
   eeprom_read_block(gameTinyLogo, LOGO_EEPROM_ADDR, 160);
-  for (int8_t y = -24; y < 16; y++)
+  /*for (int8_t y = -24; y < 16; y++)
   {
     ssd1306_drawBuffer(16, y, 40, 32, gameTinyLogo);
     delay(25);
     CLEAR_SCREEN();
-  }
-  //ssd1306_drawBuffer(16, 16, 40, 32, gameTinyLogo);
+  }*/
+  ssd1306_drawBuffer(32, 32, 40, 32, gameTinyLogo);
   ssd1306_printFixed_oldStyle(60, 29, "SPACE", STYLE_NORMAL);
   ssd1306_printFixed_oldStyle(65, 32, "INVADERS", STYLE_NORMAL);
- melody(snd_intro);
+  melody(snd_intro);
   CLEAR_SCREEN();
 }
 
@@ -71,6 +71,7 @@ void loop() {
   invadersShoot();
   updateUFO();
 
+  drawShelters();
   playerDraw();
 
   // Fix 30 FPS

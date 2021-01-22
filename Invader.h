@@ -15,7 +15,7 @@
 #define INVADER_STARTING_Y 8 // The gap between two rows
 #define INVADER_STRAFE_SPEED 2 // in pixel per strafe, how much pixels we go on the X axis at each strafe
 #define INVADER_DIVE_SPEED 8 // In pixel per dive, how much pixels we go down at each dive
-#define INVADERS_COLUMN_COUNT 9 // How much column on the invader matrix (how much invaders on one row)
+#define INVADERS_COLUMN_COUNT 2 // How much column on the invader matrix (how much invaders on one row)
 #define INVADERS_ROW_COUNT 4 // How much rows on the invader matrix
 #define INVADERS_COUNT INVADERS_COLUMN_COUNT * INVADERS_ROW_COUNT // Total count of invaders
 
@@ -30,14 +30,12 @@
 #define RIGHTIEST_ALIVE_COLUMN getColumnWithInvaderIndex(getLastColumnWithAliveInvader())
 #define RIGHT_COMPENSATION (INVADERS_COLUMN_COUNT - 1 - RIGHTIEST_ALIVE_COLUMN) * X_SPEED_RATIO
 
-#define STARTING_TIME_BETWEEN_SHOTS_MIN 30 * 2 // in frame
-#define STARTING_TIME_BETWEEN_SHOTS_MAX 30 * 5 // in frame
+#define STARTING_TIME_BETWEEN_SHOTS_MIN 30 * 1 // in frame
+#define STARTING_TIME_BETWEEN_SHOTS_MAX 30 * 3 // in frame
 #define FAST_BULLET_SPEED 3
 
 #define getIndexByCoordinates(row, col) col + row * INVADERS_COLUMN_COUNT
 
-
-static int_fast8_t invaderDirection = 1; // 1 = right and -1 = left
 static int_fast8_t invaderRightStrafeCountLimit = INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT; // How many time invaders moves on X axis before going down
 static int_fast8_t invaderLeftStrafeCountLimit = 0; // How many time invaders moves on X axis before going down
 static int_fast8_t strafeCounter = 0; // How much time we have strafed so far, can be negative if moving on left
@@ -186,7 +184,7 @@ static inline void drawInvaders() {
   //int posY = getPosY(0, diveCounterOld);
   //int posX1 = posX + INVADERS_COLUMN_COUNT*INVADER_X_GAP;
   //int posY2 = posY + INVADERS_ROW_COUNT*INVADER_Y_GAP;
-  clearRect(0, 8, 127, 50);
+  clearRect(0, 8, 127, 56);
   for (int_fast8_t i = INVADERS_COUNT - 1; i >= 0; i--) {
     if (!invaders[i].isDead) {
       drawInvader(i, strafeCounter, diveCounter);
@@ -197,6 +195,7 @@ static inline void drawInvaders() {
 static void invade() {
   static unsigned long lastStrafeTime = 0;  // the last time we strafed in ms
   static uint_fast8_t noteCounter = 4;
+  static int_fast8_t invaderDirection = 1; // 1 = right and -1 = left
 
   if (millis() - lastStrafeTime > strafeInterval) {
     if (noteCounter <= 0) noteCounter = 4;

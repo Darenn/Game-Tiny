@@ -58,13 +58,13 @@ void bulletUpdate(Bullet* bullet) {
 
 void shoot(Bullet * b, uint_fast8_t x, uint_fast8_t y) {
   b->sprite.erase();
-  b->sprite = ssd1306_createSprite(x, y, sizeof(shootSprite),  shootSprite);
+  b->sprite = ssd1306_createSprite(x, y, sizeof(shootSprite),  shootSprite); // from explosion to bullet
   b->enabled = true;
-  b->sprite.draw();
+  b->sprite.draw(); // necessary?
 }
 
 void updateFastBullet(Bullet *b) {
-  static bool usingSprite2 = false;
+  /*static bool usingSprite2 = false;
   if(usingSprite2) {
     b->sprite = ssd1306_createSprite(b->sprite.x, b->sprite.y, sizeof(bulletFast1),  bulletFast1);
     //usingSprite2 = true;
@@ -72,7 +72,7 @@ void updateFastBullet(Bullet *b) {
     b->sprite = ssd1306_createSprite(b->sprite.x, b->sprite.y, sizeof(bulletFast2),  bulletFast2);
     //usingSprite2 = false;
   }
-  usingSprite2 = !usingSprite2;
+  usingSprite2 = !usingSprite2;*/ // to uncomment if I still want bullet animations
   bulletUpdate(b);
 }
 
