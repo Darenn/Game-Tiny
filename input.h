@@ -16,7 +16,7 @@
   //sei();                      // enable all interrupts
 
 static struct PinInputs {
-  uint_fast16_t padPinValue;
+  uint_fast16_t padPinValue:15;
   bool buttonPinValue:1;
 } pinInputs;
 
