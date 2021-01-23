@@ -33,6 +33,14 @@
 #define STARTING_TIME_BETWEEN_SHOTS_MIN 30 * 1 // in frame
 #define STARTING_TIME_BETWEEN_SHOTS_MAX 30 * 3 // in frame
 
+/*
+   Find the most to the right alien alive to calculate how much more we should move to the right (in strafe move) (and same with the left).
+   Then change both X move limits for right and left.
+*/
+#define INVADER_RIGHT_STRAFE_COUNT_LIMIT INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT + RIGHT_COMPENSATION
+#define INVADER_LEFT_STRAFE_COUNT_LIMIT INVADER_STARTING_LEFT_STRAFE_COUNT_LIMIT - LEFT_COMPENSATION
+
+
 
 #define getIndexByCoordinates(row, col) col + row * INVADERS_COLUMN_COUNT
 
@@ -145,14 +153,6 @@ static uint_fast8_t getLastColumnWithAliveInvader() {
   return 0;
 }
 
-/*
-   Find the most to the right alien alive to calculate how much more we should move to the right (in strafe move) (and same with the left).
-   Then change both X move limits for right and left.
-*/
-inline static void compensateDead() {
-  invaderRightStrafeCountLimit = INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT + RIGHT_COMPENSATION;
-  invaderLeftStrafeCountLimit = INVADER_STARTING_LEFT_STRAFE_COUNT_LIMIT - LEFT_COMPENSATION;
-}
 
 void drawInvader(uint_fast8_t index, uint_fast8_t strafeCounter, uint_fast8_t diveCounter) {
   const uint8_t *spriteToDisplay;
@@ -205,8 +205,8 @@ static void invade() {
     if (noteCounter <= 0) noteCounter = 4;
     // TODO note (--noteCounter, 3);
     lastStrafeTime = millis();
-#define ld_arrivedOnRight (invaderDirection == 1) && (strafeCounter >= invaderRightStrafeCountLimit)
-#define ld_arrivedOnLeft (invaderDirection == -1) && (strafeCounter <= invaderLeftStrafeCountLimit)
+#define ld_arrivedOnRight (invaderDirection == 1) && (strafeCounter >= INVADER_RIGHT_STRAFE_COUNT_LIMIT)
+#define ld_arrivedOnLeft (invaderDirection == -1) && (strafeCounter <= INVADER_LEFT_STRAFE_COUNT_LIMIT)
     if (ld_arrivedOnRight || ld_arrivedOnLeft) { // DIVE
       //diveCounterOld = diveCounter;
       ++diveCounter;

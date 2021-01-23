@@ -79,7 +79,6 @@ static bool processCollisionWithInvaders(Bullet *theBullet) {
       uint_fast8_t y = getPosY(i);   
       if (!isDead(i) && isColliding(getBulletRect(theBullet), getInvaderRect(x, y))) {
         killInvader(i);
-        compensateDead(); // compensate the loss before redrawing
         drawInvaders(); // draw the invaders before the bullet explosion
         theBullet->sprite.x = x; // To draw the explosion on the invader position
         theBullet->sprite.y = y;
