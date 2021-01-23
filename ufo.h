@@ -51,7 +51,7 @@ static bool processCollisionWithUFO() {
 void updateUFO() {
   static uint_fast16_t timer = 0;  
   
-  if(diveCounter < 1) return;
+  if(invaderBrain.diveCounter < 1) return;
   if(!activated) activateUFO();
   
   if(launched) {

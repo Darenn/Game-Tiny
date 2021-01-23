@@ -44,12 +44,16 @@
 #define getIndexByCoordinates(row, col) col + row * INVADERS_COLUMN_COUNT
 
 static int_fast8_t strafeCounter = 0; // How much time we have strafed so far, can be negative if moving on left
-uint_fast8_t diveCounter = 0; // How much time we have dived so far
-//static int_fast8_t strafeCounterOld = 0; // How much time we have strafed so far, can be negative if moving on left
-//static uint_fast8_t diveCounterOld = 0; // How much time we have dived so far
-static int_fast8_t deadInvaders;
-
+static uint_fast8_t deadInvaders;
 uint_fast8_t invadersStates [INVADERS_COUNT/8 + 1];
+
+static Bullet bulletFast;
+
+static struct InvaderBrain {
+    uint_fast8_t noteCounter:3; // max7
+    bool invaderDirection:1; // 1 = right and 0 = left
+    uint_fast8_t diveCounter:4; //max 15  // How much time we have dived so far
+  } invaderBrain {.noteCounter = 4, .invaderDirection = 1};
 
 bool isDead(uint_fast8_t i) {
   return CHECK_BIT(invadersStates[i/8], i%8);
@@ -58,10 +62,6 @@ bool isDead(uint_fast8_t i) {
 void setDead(uint_fast8_t i){
   SET_BIT(invadersStates[i/8], i%8);
 }
-
-//static Invader invaders [INVADERS_COUNT];
-static Bullet bulletFast;
-static Bullet bulletSlow;
 
 inline static uint_fast8_t getColumnWithInvaderIndex(uint_fast8_t index) {
   return index % INVADERS_COLUMN_COUNT;
@@ -77,7 +77,7 @@ inline static uint_fast8_t getPosX(uint_fast8_t idx, uint_fast8_t strafeCounter 
   return ld_posXStart + ld_offsetXStrafe;
 }
 
-inline static uint_fast8_t getPosY(uint_fast8_t idx, uint_fast8_t diveCounter = diveCounter) {
+inline static uint_fast8_t getPosY(uint_fast8_t idx, uint_fast8_t diveCounter = invaderBrain.diveCounter) {
   return INVADER_STARTING_Y + getRowWithInvaderIndex(idx) * INVADER_Y_GAP + diveCounter * INVADER_DIVE_SPEED;
 }
 
@@ -188,29 +188,25 @@ static inline void drawInvaders() {
   clearRect(0, 8, 127, 56);
   for (int_fast8_t i = INVADERS_COUNT - 1; i >= 0; i--) {
     if (!isDead(i)) {
-      drawInvader(i, strafeCounter, diveCounter);
+      drawInvader(i, strafeCounter, invaderBrain.diveCounter);
     }
   }
 }
 
 static void invade() {
   static unsigned long lastStrafeTime = 0;  // the last time we strafed in ms
-  static uint_fast8_t noteCounter = 4;
-  static int_fast8_t invaderDirection = 1; // 1 = right and -1 = left
 
   if (millis() - lastStrafeTime > INVADERS_STARTING_STRAFE_TIME - deadInvaders*INVADERS_STRAFE_TIME_LOSS) {
-    if (noteCounter <= 0) noteCounter = 4;
-    // TODO note (--noteCounter, 3);
+    if (invaderBrain.noteCounter <= 0) invaderBrain.noteCounter = 4;
+    // TODO note (--invaderBrain.noteCounter, 3);
     lastStrafeTime = millis();
-#define ld_arrivedOnRight (invaderDirection == 1) && (strafeCounter >= INVADER_RIGHT_STRAFE_COUNT_LIMIT)
-#define ld_arrivedOnLeft (invaderDirection == -1) && (strafeCounter <= INVADER_LEFT_STRAFE_COUNT_LIMIT)
+#define ld_arrivedOnRight (invaderBrain.invaderDirection == 1) && (strafeCounter >= INVADER_RIGHT_STRAFE_COUNT_LIMIT)
+#define ld_arrivedOnLeft (invaderBrain.invaderDirection == 0) && (strafeCounter <= INVADER_LEFT_STRAFE_COUNT_LIMIT)
     if (ld_arrivedOnRight || ld_arrivedOnLeft) { // DIVE
-      //diveCounterOld = diveCounter;
-      ++diveCounter;
-      invaderDirection = -invaderDirection;
+      ++invaderBrain.diveCounter;
+      invaderBrain.invaderDirection = -invaderBrain.invaderDirection;
     } else {
-      //strafeCounterOld = strafeCounter;
-      if (invaderDirection == -1) {
+      if (invaderBrain.invaderDirection == 0) {
         --strafeCounter;
       } else {
         ++strafeCounter;
