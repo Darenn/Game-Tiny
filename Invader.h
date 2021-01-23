@@ -42,7 +42,6 @@ static int_fast8_t strafeCounter = 0; // How much time we have strafed so far, c
 uint_fast8_t diveCounter = 0; // How much time we have dived so far
 //static int_fast8_t strafeCounterOld = 0; // How much time we have strafed so far, can be negative if moving on left
 //static uint_fast8_t diveCounterOld = 0; // How much time we have dived so far
-static unsigned long strafeInterval = INVADERS_STARTING_STRAFE_TIME; // interval of time between each strafe action in ms
 static int_fast8_t deadInvaders;
 
 uint_fast8_t invadersStates [INVADERS_COUNT/8 + 1];
@@ -80,7 +79,6 @@ inline static uint_fast8_t getPosY(uint_fast8_t idx, uint_fast8_t diveCounter = 
 typedef void ( *fn_t )( void );
 
 static void killInvader(uint_fast8_t i) {
-  strafeInterval -= INVADERS_STRAFE_TIME_LOSS;
   setDead(i);
   if (i >= INVADERS_COLUMN_COUNT) {
     updateScore(10);
@@ -203,7 +201,7 @@ static void invade() {
   static uint_fast8_t noteCounter = 4;
   static int_fast8_t invaderDirection = 1; // 1 = right and -1 = left
 
-  if (millis() - lastStrafeTime > strafeInterval) {
+  if (millis() - lastStrafeTime > INVADERS_STARTING_STRAFE_TIME - deadInvaders*INVADERS_STRAFE_TIME_LOSS) {
     if (noteCounter <= 0) noteCounter = 4;
     // TODO note (--noteCounter, 3);
     lastStrafeTime = millis();
