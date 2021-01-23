@@ -45,11 +45,17 @@ uint_fast8_t diveCounter = 0; // How much time we have dived so far
 static unsigned long strafeInterval = INVADERS_STARTING_STRAFE_TIME; // interval of time between each strafe action in ms
 static int_fast8_t deadInvaders;
 
-typedef struct Invader {
-  bool isDead = false;
-} Invader;
+uint_fast8_t invadersStates [INVADERS_COUNT/8 + 1];
 
-static Invader invaders [INVADERS_COUNT];
+bool isDead(uint_fast8_t i) {
+  return CHECK_BIT(invadersStates[i/8], i%8);
+}
+
+void setDead(uint_fast8_t i){
+  SET_BIT(invadersStates[i/8], i%8);
+}
+
+//static Invader invaders [INVADERS_COUNT];
 static Bullet bulletFast;
 static Bullet bulletSlow;
 
@@ -73,9 +79,9 @@ inline static uint_fast8_t getPosY(uint_fast8_t idx, uint_fast8_t diveCounter = 
 
 typedef void ( *fn_t )( void );
 
-static void killInvader(Invader *const invader, uint_fast8_t i) {
+static void killInvader(uint_fast8_t i) {
   strafeInterval -= INVADERS_STRAFE_TIME_LOSS;
-  invader->isDead = true;
+  setDead(i);
   if (i >= INVADERS_COLUMN_COUNT) {
     updateScore(10);
   } else if (i >= INVADERS_COLUMN_COUNT * 2) {
@@ -106,7 +112,7 @@ static void killInvader(Invader *const invader, uint_fast8_t i) {
 static uint_fast8_t getFirstColumnWithAliveInvader() {
   for (uint_fast8_t col = 0; col < INVADERS_COLUMN_COUNT; ++col) {
     for (uint_fast8_t row = 0; row < INVADERS_ROW_COUNT; ++row) {
-      if (!invaders[getIndexByCoordinates(row, col)].isDead) {
+      if (!isDead(getIndexByCoordinates(row, col))) {
         return col;
       }
     }
@@ -119,7 +125,7 @@ static uint_fast8_t getFirstColumnWithAliveInvader() {
 */
 static uint_fast8_t getLastRowWithAliveInvader() {
   for (int_fast8_t i = INVADERS_COUNT - 1; i > 0; --i) {
-    if (!invaders[i].isDead) {
+    if (!isDead(i)) {
       return i % INVADERS_COLUMN_COUNT;
     }
   }
@@ -133,7 +139,7 @@ static uint_fast8_t getLastRowWithAliveInvader() {
 static uint_fast8_t getLastColumnWithAliveInvader() {
   for (int_fast8_t col = INVADERS_COLUMN_COUNT - 1; col > 0; --col) {
     for (uint_fast8_t row = 0; row < INVADERS_ROW_COUNT; ++row) {
-      if (!invaders[getIndexByCoordinates(row, col)].isDead) {
+      if (!isDead(getIndexByCoordinates(row, col))) {
         return col;
       }
     }
@@ -186,7 +192,7 @@ static inline void drawInvaders() {
   //int posY2 = posY + INVADERS_ROW_COUNT*INVADER_Y_GAP;
   clearRect(0, 8, 127, 56);
   for (int_fast8_t i = INVADERS_COUNT - 1; i >= 0; i--) {
-    if (!invaders[i].isDead) {
+    if (!isDead(i)) {
       drawInvader(i, strafeCounter, diveCounter);
     }
   }
@@ -224,7 +230,7 @@ static void invade() {
 */
 uint_fast8_t getLastRowWithAliveInvaderOnColumn(uint_fast8_t col) {
   for (int_fast8_t row = INVADERS_ROW_COUNT - 1; row > 0; --row) {
-    if (!invaders[getIndexByCoordinates(row, col)].isDead) {
+    if (!isDead(getIndexByCoordinates(row, col))) {
       return row;
     }
   }
@@ -259,7 +265,7 @@ Rect getInvaderRect(int_fast8_t x, int_fast8_t y) {
 void initInvaders() {
   for (uint_fast8_t y = 0; y < INVADERS_ROW_COUNT; ++y) {
     for (uint_fast8_t x = 0; x < INVADERS_COLUMN_COUNT; ++x) {
-      invaders[x + y * INVADERS_COLUMN_COUNT] = Invader();
+      //invaders[x + y * INVADERS_COLUMN_COUNT] = Invader();
       drawInvader(x + y * INVADERS_COLUMN_COUNT , 0, 0);
     }
   }

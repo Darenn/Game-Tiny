@@ -38,8 +38,7 @@ void melody(const Note* melody)
     delay(duration * 100);
   }
 }
-
-const Note snd_playerExplosion[] = { Note{4,1,1}, Note{3,1,1}, Note{4,1,1} , Note{3,1,1}, Note{2,1,1}, Note{3,1,2}, Note{2,1,3}, Note{1,1,4}, Note{1,1,5}, Note{0,0,0}};
 const Note snd_intro[] = {Note{4,3,2}, Note{3,3,2}, Note{2,3,2}, Note{5,3,6}, Note{0,0,0}};
+const Note snd_playerExplosion[] = { Note{4,1,1}, Note{3,1,1}, Note{4,1,1} ,Note{1,1,5}, Note{0,0,0}};
 
 #endif

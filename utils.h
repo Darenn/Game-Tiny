@@ -1,6 +1,14 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#define SET_BIT(x, pos) (x |= (1U << pos))
+#define CLEAR_BIT(x, pos) (x &= (~(1U<< pos)))
+#define LOWBYTE(v)   ((unsigned char) (x))
+#define HIGHBYTE(v)  ((unsigned char) (((unsigned int) (x)) >> 8))
+
+#define CHECK_BIT(x, pos) (x & (1UL << pos))
+#define TOGGLE_BIT(x, pos) x ^= (1U<< pos)
+
 // Our random number is actually just the time in ms since startup
 // So remember that at the same exact ms you will have the same exact number
 // And that it will loop after 50 days (ok this is not really a constraint)

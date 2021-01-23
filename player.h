@@ -77,8 +77,8 @@ static bool processCollisionWithInvaders(Bullet *theBullet) {
   for (uint_fast8_t i = 0; i < INVADERS_COUNT; ++i) { 
       uint_fast8_t x = getPosX(i);
       uint_fast8_t y = getPosY(i);   
-      if (!invaders[i].isDead && isColliding(getBulletRect(theBullet), getInvaderRect(x, y))) {
-        killInvader(&invaders[i], i);
+      if (!isDead(i) && isColliding(getBulletRect(theBullet), getInvaderRect(x, y))) {
+        killInvader(i);
         compensateDead(); // compensate the loss before redrawing
         drawInvaders(); // draw the invaders before the bullet explosion
         theBullet->sprite.x = x; // To draw the explosion on the invader position
@@ -91,6 +91,7 @@ static bool processCollisionWithInvaders(Bullet *theBullet) {
 }
 
 void playPlayerExplosionSound() {
+  
   melody(snd_playerExplosion);
 }
 
