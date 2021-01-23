@@ -15,7 +15,7 @@
 #define INVADER_STARTING_Y 8 // The gap between two rows
 #define INVADER_STRAFE_SPEED 2 // in pixel per strafe, how much pixels we go on the X axis at each strafe
 #define INVADER_DIVE_SPEED 8 // In pixel per dive, how much pixels we go down at each dive
-#define INVADERS_COLUMN_COUNT 2 // How much column on the invader matrix (how much invaders on one row)
+#define INVADERS_COLUMN_COUNT 9 // How much column on the invader matrix (how much invaders on one row)
 #define INVADERS_ROW_COUNT 4 // How much rows on the invader matrix
 #define INVADERS_COUNT INVADERS_COLUMN_COUNT * INVADERS_ROW_COUNT // Total count of invaders
 
