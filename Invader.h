@@ -37,15 +37,12 @@
    Find the most to the right alien alive to calculate how much more we should move to the right (in strafe move) (and same with the left).
    Then change both X move limits for right and left.
 */
-#define INVADER_RIGHT_STRAFE_COUNT_LIMIT INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT + RIGHT_COMPENSATION
-#define INVADER_LEFT_STRAFE_COUNT_LIMIT INVADER_STARTING_LEFT_STRAFE_COUNT_LIMIT - LEFT_COMPENSATION
-
+#define INVADER_RIGHT_STRAFE_COUNT_LIMIT INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT + RIGHT_COMPENSATION // How many time invaders moves on X axis before going down
+#define INVADER_LEFT_STRAFE_COUNT_LIMIT INVADER_STARTING_LEFT_STRAFE_COUNT_LIMIT - LEFT_COMPENSATION // How many time invaders moves on X axis before going down
 
 
 #define getIndexByCoordinates(row, col) col + row * INVADERS_COLUMN_COUNT
 
-static int_fast8_t invaderRightStrafeCountLimit = INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT; // How many time invaders moves on X axis before going down
-static int_fast8_t invaderLeftStrafeCountLimit = 0; // How many time invaders moves on X axis before going down
 static int_fast8_t strafeCounter = 0; // How much time we have strafed so far, can be negative if moving on left
 uint_fast8_t diveCounter = 0; // How much time we have dived so far
 //static int_fast8_t strafeCounterOld = 0; // How much time we have strafed so far, can be negative if moving on left
