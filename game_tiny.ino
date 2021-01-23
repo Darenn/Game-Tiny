@@ -41,7 +41,7 @@ inline void drawIntro() {
     delay(25);
     CLEAR_SCREEN();
   }*/
-  ssd1306_drawBuffer(32, 32, 40, 32, gameTinyLogo);
+  ssd1306_drawBuffer(48, 48, 40, 32, gameTinyLogo);
   ssd1306_printFixed_oldStyle(60, 29, "SPACE", STYLE_NORMAL);
   ssd1306_printFixed_oldStyle(65, 32, "INVADERS", STYLE_NORMAL);
   melody(snd_intro);
@@ -61,7 +61,7 @@ void setup() {
 }
 
 void loop() {
-  float startLoopTime = millis();  // Save time to get 30 FPS
+  unsigned long startLoopTime = millis();  // Save time to get 30 FPS
 
 // TODO  note(0, 0);
 

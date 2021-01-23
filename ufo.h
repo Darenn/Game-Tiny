@@ -7,30 +7,34 @@
 #define UFO_START_POSITION_X 0
 #define UFO_START_POSITION_Y 8
 
-#define TIME_BETWEEN_UFO_MAX 30 * 20 // in frame
-#define TIME_BETWEEN_UFO_MIN 30 * 10 // in frame
+#define TIME_BETWEEN_UFO_MAX 20 // in seconds
+#define TIME_BETWEEN_UFO_MIN 10 // in seconds
 #define UFO_SPEED 1 // in pixel per frame
 
 static SPRITE UFO = ssd1306_createSprite(0, UFO_START_POSITION_Y, sizeof(ufoBMP),  ufoBMP);
 
-static bool launched = false;
-static bool activated = false;
-static uint_fast16_t timeUntilNextUFO;
+static struct UfoInfo {
+  bool launched:1;
+  bool activated:1;
+  uint_fast8_t timeUntilNextUFO:6; // can be at 5 if you need
+} ufoInfo {false, false, 0};
+
+
 
 void launchUFO() {
- launched = true;
+ ufoInfo.launched = true;
  UFO.x = UFO_START_POSITION_X;
 }
 
 void activateUFO() {
-  activated = true;
+  ufoInfo.activated = true;
   launchUFO();
 }
 
 void killUFO() {
-  launched = false;
+  ufoInfo.launched = false;
   UFO.erase();
-  timeUntilNextUFO = GT_RANDOM_RANGE(TIME_BETWEEN_UFO_MIN, TIME_BETWEEN_UFO_MAX);
+  ufoInfo.timeUntilNextUFO = GT_RANDOM_RANGE(TIME_BETWEEN_UFO_MIN, TIME_BETWEEN_UFO_MAX);
 }
 
 
@@ -52,9 +56,9 @@ void updateUFO() {
   static uint_fast16_t timer = 0;  
   
   if(invaderBrain.diveCounter < 1) return;
-  if(!activated) activateUFO();
+  if(!ufoInfo.activated) activateUFO();
   
-  if(launched) {
+  if(ufoInfo.launched) {
     if(p.bullet.enabled) processCollisionWithUFO();
     if(UFO.x > 118) { // gone on screen limit
       killUFO();
@@ -64,7 +68,7 @@ void updateUFO() {
       UFO.draw();
     }  
   } 
-  else if(timer >= timeUntilNextUFO) {
+  else if(timer >= ufoInfo.timeUntilNextUFO*30) {
     timer=0;
     launchUFO();
   } 
