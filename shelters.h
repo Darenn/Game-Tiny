@@ -93,54 +93,45 @@ static uint8_t shelterEastBitmap[] =
   0B11111100,
 };
 
-typedef struct Shelter {
-uint8_t x;
-uint8_t y;
-uint8_t* data;
-} Shelter;
-
-#define SHELTER_COUNT 2
-
-static Shelter shelterWest {.x = SHELTER_WEST_X_POS, .y = SHELTERS_Y_POS, .data=shelterWestBitmap};
-static Shelter shelterWestCenter {.x = SHELTER_WEST_CENTER_X_POS, .y = SHELTERS_Y_POS, .data=shelterWestCenterBitmap};
-//static Shelter shelterEastCenter {.x = SHELTER_EAST_CENTER_X_POS, .y = SHELTERS_Y_POS, .data=shelterEastCenterBitmap};
-//static Shelter shelterEast {.x = SHELTER_EAST_X_POS, .y = SHELTERS_Y_POS, .data=shelterEastBitmap};
-
-Shelter* shelters[4] = {&shelterWest, &shelterWestCenter};//, &shelterEastCenter, &shelterEast};
-
 // x and y should be in the collision box
-static bool processPixelCollisionWithShelter(Shelter* shelter, int posX, int posY) {
-  signed int posXLocal = posX - shelter->x;
-  signed int posYLocal = posY - shelter->y;
+static bool processPixelCollisionWithShelter(int shelterPoxX, int shelterPosY, uint8_t* data, int posX, int posY) {
+  signed int posXLocal = posX - shelterPoxX;
+  signed int posYLocal = posY - shelterPosY;
+  uint8_t* dataCopy = data;
   if(posXLocal <0 || posYLocal <0) return false;
-  int8_t* data = shelter->data;
-  if(CHECK_BIT(data[posXLocal], posYLocal)) {
-    CLEAR_BIT(data[posXLocal], posYLocal);
-    if(posXLocal-1 > 0) CLEAR_BIT(data[posXLocal-1], posYLocal);
-    if(posXLocal+1 < SHELTER_WIDTH) CLEAR_BIT(data[posXLocal+1], posYLocal);
-    if(posYLocal-1 > 0) CLEAR_BIT(data[posXLocal], posYLocal-1);
-    if(posYLocal+1 < 8) CLEAR_BIT(data[posXLocal+1], posYLocal+1);
-    shelter->data = data;
+  if(CHECK_BIT(dataCopy[posXLocal], posYLocal)) {
+    CLEAR_BIT(dataCopy[posXLocal], posYLocal);
+    if(posXLocal-1 > 0) CLEAR_BIT(dataCopy[posXLocal-1], posYLocal);
+    if(posXLocal+1 < SHELTER_WIDTH) CLEAR_BIT(dataCopy[posXLocal+1], posYLocal);
+    if(posYLocal-1 > 0) CLEAR_BIT(dataCopy[posXLocal], posYLocal-1);
+    if(posYLocal+1 < 8) CLEAR_BIT(dataCopy[posXLocal+1], posYLocal+1);
+    data = dataCopy;
     return true;
   } 
   return false;
 }
 
-bool processCollisionWithShelters(Bullet *theBullet) {
-  for (uint_fast8_t i = 0; i < SHELTER_COUNT; ++i) {
-    Shelter* shelter = shelters[i];
-    Rect shelterRect = Rect{shelter->x, shelter->y, shelter->x + SHELTER_WIDTH, shelter->y + 8};
-    if (isColliding(getBulletRect(theBullet), shelterRect) && processPixelCollisionWithShelter(shelter,theBullet->sprite.x, theBullet->sprite.y+3)) {
-      kill(theBullet);
-      return true;
-    }
+
+bool processCollisionWithShelter(Bullet *theBullet, int posX, int posY, uint8_t* data) {
+  Rect shelterRect = Rect{posX, posY, posX + SHELTER_WIDTH, posY + 8};
+  if (isColliding(getBulletRect(theBullet), shelterRect) && processPixelCollisionWithShelter(posX,posY, data, theBullet->sprite.x, theBullet->sprite.y+3)) {
+    kill(theBullet);
+    return true;
   }
   return false;
 }
 
+bool processCollisionWithShelters(Bullet *theBullet) {
+  return (processCollisionWithShelter(theBullet, SHELTER_WEST_X_POS, SHELTERS_Y_POS, shelterWestBitmap) ||
+  processCollisionWithShelter(theBullet, SHELTER_WEST_CENTER_X_POS, SHELTERS_Y_POS, shelterWestCenterBitmap) ||
+  processCollisionWithShelter(theBullet, SHELTER_EAST_CENTER_X_POS, SHELTERS_Y_POS, shelterEastCenterBitmap) ||
+  processCollisionWithShelter(theBullet, SHELTER_EAST_X_POS, SHELTERS_Y_POS, shelterEastBitmap));
+}
+
+
 void drawShelters() {
-  ssd1306_drawBuffer(shelterWest.x, SHELTERS_Y_POS/8, SHELTER_WIDTH, 8, shelterWest.data);
-  ssd1306_drawBuffer(shelterWestCenter.x, SHELTERS_Y_POS/8, SHELTER_WIDTH, 8, shelterWestCenter.data);
-  /*ssd1306_drawBuffer(shelterEastCenter.x, SHELTERS_Y_POS/8, 9, 8, shelterEastCenter.data);
-  ssd1306_drawBuffer(shelterEast.x, SHELTERS_Y_POS/8, 9, 8, shelterEast.data);*/
+  ssd1306_drawBuffer(SHELTER_WEST_X_POS, SHELTERS_Y_POS/8, SHELTER_WIDTH, 8, shelterWestBitmap);
+  ssd1306_drawBuffer(SHELTER_WEST_CENTER_X_POS, SHELTERS_Y_POS/8, SHELTER_WIDTH, 8, shelterWestCenterBitmap);
+  ssd1306_drawBuffer(SHELTER_EAST_CENTER_X_POS, SHELTERS_Y_POS/8, SHELTER_WIDTH, 8, shelterEastCenterBitmap);
+  ssd1306_drawBuffer(SHELTER_EAST_X_POS, SHELTERS_Y_POS/8, SHELTER_WIDTH, 8, shelterEastBitmap);
 }

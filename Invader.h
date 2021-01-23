@@ -229,15 +229,13 @@ uint_fast8_t getLastRowWithAliveInvaderOnColumn(uint_fast8_t col) {
 }
 
 static void invadersShoot() {
-  static uint_fast8_t timeBetweenShotsMin = STARTING_TIME_BETWEEN_SHOTS_MIN;
-  static uint_fast8_t timeBetweenShotsMax = STARTING_TIME_BETWEEN_SHOTS_MIN;
-  static uint_fast8_t timeUntilNextShot = GT_RANDOM_RANGE(timeBetweenShotsMin, timeBetweenShotsMax);
+  static uint_fast8_t timeUntilNextShot = GT_RANDOM_RANGE(STARTING_TIME_BETWEEN_SHOTS_MIN, STARTING_TIME_BETWEEN_SHOTS_MAX);
   static uint_fast8_t shotTimer = 0;
 
   ++shotTimer;
   if (shotTimer >= timeUntilNextShot) {
     shotTimer = 0;
-    timeUntilNextShot = GT_RANDOM_RANGE(timeBetweenShotsMin, timeBetweenShotsMax);
+    timeUntilNextShot = GT_RANDOM_RANGE(STARTING_TIME_BETWEEN_SHOTS_MIN, STARTING_TIME_BETWEEN_SHOTS_MAX);
     const uint_fast8_t col = GT_RANDOM_RANGE(getFirstColumnWithAliveInvader(), getLastColumnWithAliveInvader());
     const uint_fast8_t row = getLastRowWithAliveInvaderOnColumn(col);
     const uint_fast8_t index = getIndexByCoordinates(row, col);

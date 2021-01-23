@@ -9,11 +9,8 @@
 
 typedef struct Bullet {
   SPRITE sprite;
-  bool enabled = false;
-  uint_fast8_t directionnalSpeed = PLAYER_BULLET_SPEED;
-  
-  //int_fast8_t explosionTimer = 0;
-  //bool exploding = false;
+  int_fast8_t directionnalSpeed:7;
+  bool enabled:1;
 } Bullet;
 
 Rect getBulletRect(Bullet *b) {
@@ -22,8 +19,6 @@ Rect getBulletRect(Bullet *b) {
 
 void kill(Bullet *bullet) {
   bullet->enabled = false;
-  //bullet->exploding = true;
-  //bullet->explosionTimer = EXPLOSION_DURATION;
   bullet->sprite.erase();
   bullet->sprite = ssd1306_createSprite(bullet->sprite.x, bullet->sprite.y, sizeof(explosion),  explosion);
   bullet->sprite.draw();
@@ -43,18 +38,8 @@ void bulletUpdate(Bullet* bullet) {
       return;
     }
     bulletDraw(bullet);
-    /*if(!processCollisionWithInvaders(bullet)) {
-      bulletDraw(bullet);
-    }*/
     bullet->sprite.y += bullet->directionnalSpeed;
-  } /*else if(bullet->exploding) {
-      if(bullet->explosionTimer == 0) {
-         //bullet->sprite.erase();
-         bullet->exploding = false;
-      } else {
-        --bullet->explosionTimer;
-      }
-  }*/
+  } 
 }
 
 void shoot(Bullet * b, uint_fast8_t x, uint_fast8_t y) {

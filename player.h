@@ -15,13 +15,11 @@
 #define PLAYER_SHOOT_COOLDOWN 600 //in ms
 #define PLAYER_SPEED 2 // pixel per frame
 
-typedef struct Player {
+static struct Player {
   SPRITE sprite;
   Bullet bullet;
-  uint_fast8_t hp = 3;
-} Player;
-
-static Player p;
+  uint_fast8_t hp;
+} p;
 
 void displayPlayerLife() {
   ssd1306_printFixed_oldStyle(127-6*6, 0, "LIFE:", STYLE_NORMAL);
@@ -33,6 +31,8 @@ void displayPlayerLife() {
 void init_player() {
    p.sprite = ssd1306_createSprite(START_POS_X, START_POS_Y, sizeof(playerBMP),  playerBMP); 
    p.sprite.draw();
+   p.hp=3;
+   p.bullet.directionnalSpeed= PLAYER_BULLET_SPEED;
    displayPlayerLife();
 }
 
@@ -79,6 +79,7 @@ static bool processCollisionWithInvaders(Bullet *theBullet) {
       uint_fast8_t y = getPosY(i);   
       if (!isDead(i) && isColliding(getBulletRect(theBullet), getInvaderRect(x, y))) {
         killInvader(i);
+        //compensateDead(); // compensate the loss before redrawing
         drawInvaders(); // draw the invaders before the bullet explosion
         theBullet->sprite.x = x; // To draw the explosion on the invader position
         theBullet->sprite.y = y;
