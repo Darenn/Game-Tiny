@@ -3,6 +3,7 @@
 
 #define PLAYER_BULLET_SPEED -3
 #define EXPLOSION_DURATION 15 // in frame
+#define FAST_BULLET_SPEED 1
 
 #include "physics.h"
 
@@ -16,7 +17,7 @@ typedef struct Bullet {
 } Bullet;
 
 Rect getBulletRect(Bullet *b) {
-  return Rect{b->sprite.x, b->sprite.y, b->sprite.x + 8, b->sprite.y + 8};
+  return Rect{b->sprite.x, b->sprite.y, b->sprite.x + 1, b->sprite.y + 6};
 }
 
 void kill(Bullet *bullet) {

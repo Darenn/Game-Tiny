@@ -35,15 +35,15 @@ Shelter shelterWest {.x = SHELTER_WEST_X_POS, .y = SHELTERS_Y_POS, .data=shelter
 
 // x and y should be in the collision box
 static bool processPixelCollisionWithShelter(Shelter* shelter, int posX, int posY) {
-  int posXLocal = posX - shelter->x;
-  int posYLocal = posY - shelter->y;
+  signed int posXLocal = posX - shelter->x;
+  signed int posYLocal = posY - shelter->y;
+  if(posXLocal <0 || posYLocal <0) return false;
   int8_t* data = shelter->data;
   if(CHECK_BIT(data[posXLocal], posYLocal)) {
     TOGGLE_BIT(data[posXLocal], posYLocal);
     shelter->data = data;
     debugDisplayInt(posXLocal, 0, 40);
     debugDisplayInt(posYLocal, 0, 50);
-    delay(4000);
     return true;
   } 
   return false;
@@ -51,7 +51,7 @@ static bool processPixelCollisionWithShelter(Shelter* shelter, int posX, int pos
 
 bool processCollisionWithShelters(Bullet *theBullet) {
   Rect shelterRect = Rect{shelterWest.x, shelterWest.y, shelterWest.x + 8, shelterWest.y + 8};
-  if (isColliding(getBulletRect(theBullet), shelterRect) && processPixelCollisionWithShelter(&shelterWest,theBullet->sprite.x+8, theBullet->sprite.y+8)) {
+  if (isColliding(getBulletRect(theBullet), shelterRect) && processPixelCollisionWithShelter(&shelterWest,theBullet->sprite.x, theBullet->sprite.y+3)) {
     kill(theBullet);
     return true;
   }

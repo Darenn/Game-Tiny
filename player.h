@@ -62,7 +62,7 @@ static void playerShoot() {
   if ( IS_A_BUTTON_PRESSED && ((millis() - lastShootTime) >= PLAYER_SHOOT_COOLDOWN) ) {
       lastShootTime = millis();
       //p.sprite = ssd1306_createSprite(p.sprite.x, p.sprite.y, sizeof(playerBMP),  playerBMP);
-      shoot(&p.bullet, p.sprite.x + 4, p.sprite.y - 4);
+      shoot(&p.bullet, p.sprite.x + 4, p.sprite.y);
       // TODO note(7,4);
       //cooldownOver = false;
     }
@@ -122,7 +122,11 @@ static bool processCollisionWithPlayer(Bullet *theBullet) {
 
 
 void playerUpdate() {
-  processCollisionWithInvaders(&p.bullet);
+  if(p.bullet.enabled) {
+    if(!processCollisionWithShelters(&p.bullet)) {
+      processCollisionWithInvaders(&p.bullet);
+    }
+  }
   if(bulletFast.enabled) {
     if(!processCollisionWithShelters(&bulletFast)) {
        processCollisionWithPlayer(&bulletFast);

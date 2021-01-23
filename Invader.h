@@ -32,7 +32,7 @@
 
 #define STARTING_TIME_BETWEEN_SHOTS_MIN 30 * 1 // in frame
 #define STARTING_TIME_BETWEEN_SHOTS_MAX 30 * 3 // in frame
-#define FAST_BULLET_SPEED 3
+
 
 #define getIndexByCoordinates(row, col) col + row * INVADERS_COLUMN_COUNT
 
@@ -244,7 +244,7 @@ static void invadersShoot() {
     const uint_fast8_t col = GT_RANDOM_RANGE(getFirstColumnWithAliveInvader(), getLastColumnWithAliveInvader());
     const uint_fast8_t row = getLastRowWithAliveInvaderOnColumn(col);
     const uint_fast8_t index = getIndexByCoordinates(row, col);
-    shoot(&bulletFast, getPosX(index) + INVADER_WIDTH / 2, getPosY(index) + INVADER_WIDTH);
+    shoot(&bulletFast, getPosX(index) + INVADER_WIDTH / 2, getPosY(index) + INVADER_WIDTH); // TODO IT USEs THE PLAYER SPRITE
   }
   updateFastBullet(&bulletFast);
 }
