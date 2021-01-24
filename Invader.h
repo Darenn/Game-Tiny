@@ -56,11 +56,11 @@ static struct InvaderBrain {
   } invaderBrain {.noteCounter = 4, .invaderDirection = false};
 
 bool isDead(uint_fast8_t i) {
-  return CHECK_BIT(invadersStates[i/8], i%8);
+  return CHECK_BIT(invadersStates[i>>3], i%8);
 }
 
 void setDead(uint_fast8_t i){
-  SET_BIT(invadersStates[i/8], i%8);
+  SET_BIT(invadersStates[i>>8], i%8);
 }
 
 inline static uint_fast8_t getColumnWithInvaderIndex(uint_fast8_t index) {

@@ -11,6 +11,7 @@ typedef struct Note {
 
 /*
  * Inspired by http://www.technoblogy.com/show?20MO and rewritten and upgraded by Thierry Costa and Darenn Keller
+ * note < 12, octave <  4
  */
 void melody(const Note* melody)
 {
@@ -23,10 +24,10 @@ void melody(const Note* melody)
     const uint_fast8_t n      = melody->note;
     const uint_fast8_t octave = melody->octave;
 
-    uint_fast8_t prescaler = 8 + Clock - (octave + n / 12);
+    uint_fast8_t prescaler = 8 + Clock - (octave);
     if ((prescaler & 0xf0) || octave == 0) prescaler = 0;
     DDRB = (DDRB & ~(1 << PIN_BUZZER)) | (prescaler != 0) << PIN_BUZZER;
-    OCR1C = pgm_read_byte(&scale[n % 12]) - 1;
+    OCR1C = pgm_read_byte(&scale[n]) - 1;
     GTCCR = (PIN_BUZZER == 4) << COM1B0;
     TCCR1 = (1 << CTC1) | ((PIN_BUZZER == 1) << COM1A0) | (prescaler << CS10);
 

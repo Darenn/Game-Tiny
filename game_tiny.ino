@@ -42,8 +42,6 @@ void drawIntro() {
     CLEAR_SCREEN();
   }*/
   ssd1306_drawBuffer(48, 48, 40, 32, gameTinyLogo);
-  ssd1306_printFixed_oldStyle(60, 29, "SPACE", STYLE_NORMAL);
-  ssd1306_printFixed_oldStyle(65, 32, "INVADERS", STYLE_NORMAL);
   melody(snd_intro);
   CLEAR_SCREEN();
 }
