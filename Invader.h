@@ -16,7 +16,7 @@
 #define INVADER_STRAFE_SPEED 2 // in pixel per strafe, how much pixels we go on the X axis at each strafe
 #define INVADER_DIVE_SPEED 8 // In pixel per dive, how much pixels we go down at each dive
 #define INVADERS_COLUMN_COUNT 9 // How much column on the invader matrix (how much invaders on one row)
-#define INVADERS_ROW_COUNT 4 // How much rows on the invader matrix
+#define INVADERS_ROW_COUNT 3 // How much rows on the invader matrix
 #define INVADERS_COUNT INVADERS_COLUMN_COUNT * INVADERS_ROW_COUNT // Total count of invaders
 
 #define INVADERS_STARTING_STRAFE_TIME 2750 //3000
@@ -45,22 +45,24 @@
 
 static int_fast8_t strafeCounter = 0; // How much time we have strafed so far, can be negative if moving on left
 static uint_fast8_t deadInvaders;
-uint_fast8_t invadersStates [INVADERS_COUNT/8 + 1];
+uint_fast8_t invadersStates [INVADERS_COUNT / 8 + 1];
 
 static Bullet bulletFast;
+uint_fast8_t strafeCounterOld;
+uint_fast8_t diveCounterOld;
 
 static struct InvaderBrain {
-    uint_fast8_t noteCounter:3; // max7
-    bool invaderDirection:1; // false = right; true = left
-    uint_fast8_t diveCounter:4; //max 15  // How much time we have dived so far
-  } invaderBrain {.noteCounter = 4, .invaderDirection = false};
+  uint_fast8_t noteCounter: 3; // max7
+  bool invaderDirection: 1; // false = right; true = left
+  uint_fast8_t diveCounter: 4; //max 15  // How much time we have dived so far
+} invaderBrain {.noteCounter = 4, .invaderDirection = false};
 
 bool isDead(uint_fast8_t i) {
-  return CHECK_BIT(invadersStates[i>>3], i%8);
+  return CHECK_BIT(invadersStates[i/8], i % 8);
 }
 
-void setDead(uint_fast8_t i){
-  SET_BIT(invadersStates[i>>8], i%8);
+void setDead(uint_fast8_t i) {
+  SET_BIT(invadersStates[i/8], i % 8);
 }
 
 inline static uint_fast8_t getColumnWithInvaderIndex(uint_fast8_t index) {
@@ -85,13 +87,13 @@ typedef void ( *fn_t )( void );
 
 static void killInvader(uint_fast8_t i) {
   setDead(i);
+  uint8_t score = 30;
   if (i >= INVADERS_COLUMN_COUNT) {
-    updateScore(10);
+    score = 10;
   } else if (i >= INVADERS_COLUMN_COUNT * 2) {
-    updateScore(20);
-  } else {
-    updateScore(30);
-  }
+    score = 20;
+  } 
+  updateScore(score);
   if (++deadInvaders >= INVADERS_COUNT) {
     // TODO call win screen
     // for now just reset
@@ -99,12 +101,12 @@ static void killInvader(uint_fast8_t i) {
     delay(1000);
     (( fn_t ) ( 0x0000 ))();
     /*do
-    {
+      {
       wdt_enable(WDTO_15MS);
       for (;;)
       {
       }
-    } while (0);*/
+      } while (0);*/
   }
 }
 
@@ -154,26 +156,29 @@ static uint_fast8_t getLastColumnWithAliveInvader() {
 void drawInvader(uint_fast8_t index, uint_fast8_t strafeCounter, uint_fast8_t diveCounter) {
   const uint8_t *spriteToDisplay;
   if (index >= INVADERS_COLUMN_COUNT * 2) {
-    if (strafeCounter&1) {
+    if (strafeCounter & 1) {
       spriteToDisplay = invaderGhostMove;
     } else {
       spriteToDisplay = invaderGhostIdle;
     }
   }
   else if (index >= INVADERS_COLUMN_COUNT) {
-    if (strafeCounter&1) {
+    if (strafeCounter & 1) {
       spriteToDisplay = invaderPoulpeMove;
     } else {
       spriteToDisplay = invaderPoulpeIdle;
     }
   } else {
-    if (strafeCounter&1) {
+    if (strafeCounter & 1) {
       spriteToDisplay = invaderAlienMove;
     } else {
       spriteToDisplay = invaderAlienIdle;
     }
   }
-  SPRITE s = ssd1306_createSprite(getPosX(index), getPosY(index, diveCounter), INVADER_WIDTH, spriteToDisplay);
+  SPRITE s = ssd1306_createSprite(getPosX(index, strafeCounterOld), getPosY(index, diveCounterOld), INVADER_WIDTH, spriteToDisplay);
+  //s.erase();
+  s.x = getPosX(index, strafeCounter);
+  s.y = getPosY(index, diveCounter); 
   s.draw();
 }
 
@@ -181,11 +186,11 @@ void drawInvader(uint_fast8_t index, uint_fast8_t strafeCounter, uint_fast8_t di
    Should be called only when they move to avoid flickering.
 */
 static inline void drawInvaders() {
-  //int posX = getPosX(0, strafeCounterOld);
-  //int posY = getPosY(0, diveCounterOld);
-  //int posX1 = posX + INVADERS_COLUMN_COUNT*INVADER_X_GAP;
-  //int posY2 = posY + INVADERS_ROW_COUNT*INVADER_Y_GAP;
-  clearRect(0, 8, 127, 56);
+  int posX = getPosX(0, strafeCounterOld);
+  int posY = getPosY(0, diveCounterOld);
+  int posX1 = posX + INVADERS_COLUMN_COUNT*INVADER_X_GAP;
+  int posY2 = posY + INVADERS_ROW_COUNT*INVADER_Y_GAP;
+  clearRect(posX,posY, posX1, posY2);
   for (int_fast8_t i = INVADERS_COUNT - 1; i >= 0; i--) {
     if (!isDead(i)) {
       drawInvader(i, strafeCounter, invaderBrain.diveCounter);
@@ -196,16 +201,18 @@ static inline void drawInvaders() {
 static void invade() {
   static unsigned long lastStrafeTime = 0;  // the last time we strafed in ms
 
-  if (millis() - lastStrafeTime > INVADERS_STARTING_STRAFE_TIME - deadInvaders*INVADERS_STRAFE_TIME_LOSS) {
+  if (millis() - lastStrafeTime > INVADERS_STARTING_STRAFE_TIME - deadInvaders * INVADERS_STRAFE_TIME_LOSS) {
     if (invaderBrain.noteCounter <= 0) invaderBrain.noteCounter = 4;
     // TODO note (--invaderBrain.noteCounter, 3);
     lastStrafeTime = millis();
 #define ld_arrivedOnRight (!invaderBrain.invaderDirection) && (strafeCounter >= INVADER_RIGHT_STRAFE_COUNT_LIMIT)
 #define ld_arrivedOnLeft (invaderBrain.invaderDirection) && (strafeCounter <= INVADER_LEFT_STRAFE_COUNT_LIMIT)
     if (ld_arrivedOnRight || ld_arrivedOnLeft) { // DIVE
+      diveCounterOld = invaderBrain.diveCounter;
       ++invaderBrain.diveCounter;
       invaderBrain.invaderDirection = !invaderBrain.invaderDirection;
     } else {
+      strafeCounterOld = strafeCounter;
       if (invaderBrain.invaderDirection) {
         --strafeCounter;
       } else {

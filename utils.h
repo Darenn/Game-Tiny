@@ -6,7 +6,7 @@
 #define LOWBYTE(v)   ((unsigned char) (x))
 #define HIGHBYTE(v)  ((unsigned char) (((unsigned int) (x)) >> 8))
 
-#define CHECK_BIT(x, pos) (x & (1UL << pos))
+#define CHECK_BIT(x, pos) (x & (1U << pos))
 #define TOGGLE_BIT(x, pos) x ^= (1U<< pos)
 
 // Our random number is actually just the time in ms since startup

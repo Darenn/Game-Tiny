@@ -17,7 +17,7 @@ void melody(const Note* melody)
 {
   // Cater for 16MHz, 8MHz, or 1MHz clock:
   static const int Clock = ((F_CPU / 1000000UL) == 16) ? 4 : ((F_CPU / 1000000UL) == 8) ? 3 : 0;
-  static const uint8_t scale[] PROGMEM = {239, 226, 213, 201, 190, 179, 169, 160, 151, 142, 134, 127};
+  static const uint8_t scale[] PROGMEM = {238, 225, 212, 200, 189, 178, 168, 159, 150, 141, 133, 126};
   
   while (true)
   {
@@ -27,7 +27,7 @@ void melody(const Note* melody)
     uint_fast8_t prescaler = 8 + Clock - (octave);
     if ((prescaler & 0xf0) || octave == 0) prescaler = 0;
     DDRB = (DDRB & ~(1 << PIN_BUZZER)) | (prescaler != 0) << PIN_BUZZER;
-    OCR1C = pgm_read_byte(&scale[n]) - 1;
+    OCR1C = pgm_read_byte(&scale[n]);
     GTCCR = (PIN_BUZZER == 4) << COM1B0;
     TCCR1 = (1 << CTC1) | ((PIN_BUZZER == 1) << COM1A0) | (prescaler << CS10);
 

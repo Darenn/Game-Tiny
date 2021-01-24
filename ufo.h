@@ -60,7 +60,7 @@ void updateUFO() {
   
   if(ufoInfo.launched) {
     if(p.bullet.enabled) processCollisionWithUFO();
-    if(UFO.x > 118) { // gone on screen limit
+    if(UFO.x > 114) { // gone on screen limit
       killUFO();
     } else {
       UFO.x += UFO_SPEED;

@@ -13,8 +13,10 @@ void clearRect(lcdint_t x1, lcdint_t y1, lcdint_t x2, lcdint_t y2)
 {
    //attinyAssert(x1 < x2, "!: Fill rect x1 >= x2");
    //attinyAssert(y1 < y2, "!: Fill rect y1 >= y2");
-   //if ((lcduint_t)x2 >= ssd1306_displayWidth()) x2 = (lcdint_t)ssd1306_displayWidth() - 1;
-   //if ((lcduint_t)y2 >= ssd1306_displayHeight()) y2 = (lcdint_t)ssd1306_displayHeight() - 1;
+   if ((lcduint_t)x1 < 0) x1 =0;
+   if ((lcduint_t)y1 < 0) y1 =0;
+   if ((lcduint_t)x2 >= ssd1306_displayWidth()) x2 = (lcdint_t)ssd1306_displayWidth() - 1;
+   if ((lcduint_t)y2 >= ssd1306_displayHeight()) y2 = (lcdint_t)ssd1306_displayHeight() - 1;
    uint8_t bank1 = (y1 >> 3);
    uint8_t bank2 = (y2 >> 3);
    ssd1306_lcd.set_block(x1, bank1, x2 - x1 + 1);
