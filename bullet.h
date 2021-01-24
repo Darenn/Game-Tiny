@@ -1,7 +1,7 @@
 #ifndef BULLET_H
 #define BULLET_H
 
-#define PLAYER_BULLET_SPEED -3
+#define PLAYER_BULLET_SPEED -2
 #define EXPLOSION_DURATION 15 // in frame
 #define FAST_BULLET_SPEED 1
 

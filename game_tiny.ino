@@ -30,7 +30,7 @@
 #define TIME_PER_FRAME 32 // in ms
 
 
-inline void drawIntro() {
+void drawIntro() {
   CLEAR_SCREEN();
   delay(500);
   unsigned char gameTinyLogo [160];

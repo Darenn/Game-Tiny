@@ -51,9 +51,9 @@ static Bullet bulletFast;
 
 static struct InvaderBrain {
     uint_fast8_t noteCounter:3; // max7
-    bool invaderDirection:1; // 1 = right and 0 = left
+    bool invaderDirection:1; // false = right; true = left
     uint_fast8_t diveCounter:4; //max 15  // How much time we have dived so far
-  } invaderBrain {.noteCounter = 4, .invaderDirection = 1};
+  } invaderBrain {.noteCounter = 4, .invaderDirection = false};
 
 bool isDead(uint_fast8_t i) {
   return CHECK_BIT(invadersStates[i/8], i%8);
@@ -200,13 +200,13 @@ static void invade() {
     if (invaderBrain.noteCounter <= 0) invaderBrain.noteCounter = 4;
     // TODO note (--invaderBrain.noteCounter, 3);
     lastStrafeTime = millis();
-#define ld_arrivedOnRight (invaderBrain.invaderDirection == 1) && (strafeCounter >= INVADER_RIGHT_STRAFE_COUNT_LIMIT)
-#define ld_arrivedOnLeft (invaderBrain.invaderDirection == 0) && (strafeCounter <= INVADER_LEFT_STRAFE_COUNT_LIMIT)
+#define ld_arrivedOnRight (!invaderBrain.invaderDirection) && (strafeCounter >= INVADER_RIGHT_STRAFE_COUNT_LIMIT)
+#define ld_arrivedOnLeft (invaderBrain.invaderDirection) && (strafeCounter <= INVADER_LEFT_STRAFE_COUNT_LIMIT)
     if (ld_arrivedOnRight || ld_arrivedOnLeft) { // DIVE
       ++invaderBrain.diveCounter;
-      invaderBrain.invaderDirection = -invaderBrain.invaderDirection;
+      invaderBrain.invaderDirection = !invaderBrain.invaderDirection;
     } else {
-      if (invaderBrain.invaderDirection == 0) {
+      if (invaderBrain.invaderDirection) {
         --strafeCounter;
       } else {
         ++strafeCounter;

@@ -13,7 +13,7 @@
 #define START_POS_X 64 - PLAYER_WIDTH/2
 #define START_POS_Y 56
 #define PLAYER_SHOOT_COOLDOWN 600 //in ms
-#define PLAYER_SPEED 2 // pixel per frame
+#define PLAYER_SPEED 1 // pixel per frame
 
 static struct Player {
   SPRITE sprite;
