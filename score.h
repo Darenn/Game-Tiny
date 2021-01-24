@@ -10,13 +10,15 @@
 
 #define SCORE_STR "E<CD="
 
+
+
 void updateScore(uint_fast16_t toAdd) {
   static uint_fast16_t score = 0;
   score += toAdd;
   ssd1306_printFixed_oldStyle(0, 0, SCORE_STR, STYLE_NORMAL);
-  //static char tempStr[6] = {0};
-  //utoa(tempStr, score, 10);
-  //ssd1306_printFixed_oldStyle(40, 0, tempStr, STYLE_NORMAL);
+  char tempStr[6] = {0};
+  utoa(score, tempStr, 10);
+  ssd1306_printFixed_oldStyle(4*6, 0, tempStr, STYLE_NORMAL);
 }
 
 #endif

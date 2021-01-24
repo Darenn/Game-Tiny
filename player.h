@@ -24,10 +24,10 @@ static struct Player {
 } p;
 
 void displayPlayerLife() {
-  ssd1306_printFixed_oldStyle(127-6*6, 0, LIVES_STR, STYLE_NORMAL);
+  ssd1306_printFixed_oldStyle(127-4*7, 0, LIVES_STR, STYLE_NORMAL);
   char tempStr[6] = {0};
   utoa(p.hp, tempStr, 10);
-  ssd1306_printFixed_oldStyle(127-1*6, 0, tempStr, STYLE_NORMAL);
+  ssd1306_printFixed_oldStyle(127-4*1, 0, tempStr, STYLE_NORMAL);
 }
 
 void init_player() {
