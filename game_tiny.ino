@@ -20,6 +20,7 @@
 #include "ufo.h"
 #include"gametiny_font.h"
 #include "menus.h"
+#include "testing.h"
 #define DEBUG
 
 // 0 | 0 | PB5 | PB4 | PB3 | PB2 | PB1 | PB0
