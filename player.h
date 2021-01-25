@@ -1,13 +1,12 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#define LIVES_STR "A@H=E"
-
 #include "input.h"
 #include "ssd1306.h"
 #include "bullet.h"
 #include "invader.h"
 #include "shelters.h"
+#include "texts.h"
 
 
 #define PLAYER_WIDTH 7
@@ -24,10 +23,10 @@ static struct Player {
 } p;
 
 void displayPlayerLife() {
-  ssd1306_printFixed_oldStyle(127-4*7, 0, LIVES_STR, STYLE_NORMAL);
-  char tempStr[6] = {0};
-  utoa(p.hp, tempStr, 10);
-  ssd1306_printFixed_oldStyle(127-4*1, 0, tempStr, STYLE_NORMAL);
+  load_text(TXT_LIVES_ID);
+  ssd1306_printFixed_oldStyle(127-4*7, 0, str_buffer, STYLE_NORMAL);
+  utoa(p.hp, str_buffer, 10);
+  ssd1306_printFixed_oldStyle(127-4*1, 0, str_buffer, STYLE_NORMAL);
 }
 
 void init_player() {

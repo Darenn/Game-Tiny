@@ -19,6 +19,7 @@
 #include "score.h"
 #include "ufo.h"
 #include"gametiny_font.h"
+#include "menus.h"
 #define DEBUG
 
 // 0 | 0 | PB5 | PB4 | PB3 | PB2 | PB1 | PB0
@@ -53,6 +54,10 @@ void setup() {
   SETUP_PINS();
 
   drawIntro();
+
+  drawMainMenu();
+  while(!IS_A_BUTTON_PRESSED) {updateInputs();}
+  CLEAR_SCREEN();
   initInvaders();
   updateScore(0);
   init_player();

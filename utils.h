@@ -9,6 +9,8 @@
 #define CHECK_BIT(x, pos) (x & (1U << pos))
 #define TOGGLE_BIT(x, pos) x ^= (1U<< pos)
 
+
+
 // Our random number is actually just the time in ms since startup
 // So remember that at the same exact ms you will have the same exact number
 // And that it will loop after 50 days (ok this is not really a constraint)

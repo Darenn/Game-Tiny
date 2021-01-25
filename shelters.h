@@ -1,4 +1,5 @@
-
+#ifndef SHELTER_H
+#define SHELTER_H
 
 #define SHELTERS_Y_POS 48
 
@@ -135,3 +136,5 @@ void drawShelters() {
   ssd1306_drawBuffer(SHELTER_EAST_CENTER_X_POS, SHELTERS_Y_POS/8, SHELTER_WIDTH, 8, shelterEastCenterBitmap);
   ssd1306_drawBuffer(SHELTER_EAST_X_POS, SHELTERS_Y_POS/8, SHELTER_WIDTH, 8, shelterEastBitmap);
 }
+
+#endif
