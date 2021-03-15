@@ -20,7 +20,7 @@
 #include "ssd1306.h"
 
 #define LOGO_EEPROM_ADDR 0
-#define NEXT_FREE_EEPROM_ADDR 159 // 160 - 1
+#define HIGH_SCORE_EEPROM_ADDR 160
 
 
 // Use it only once to write log on eeprom before pushing the real game

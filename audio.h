@@ -46,6 +46,8 @@ void melody(const Note* melody)
   }
 }
 
-const Note snd_playerExplosion[] = { Note{4,1,1}, Note{3,1,1}, Note{4,1,1} ,Note{1,1,5}, Note{0,0,0}};
-const Note snd_intro[] = {Note{4,3,2}, Note{3,3,2}, Note{2,3,2}, Note{5,3,6}, Note{0,0,0}};
+const Note snd_playerExplosion[] = { Note{4,2,1}, Note{3,2,1}, Note{2,2,1}, Note{0,0,0}};
+const Note snd_intro[] = {Note{1,1,1}, Note{2,1,1}, Note{3,3,1}, Note{4,3,1}, Note{9,4,2}, Note{0,0,0}};
+const Note snd_gameOver[] = {Note{5,2,1}, Note{3,2,1}, Note{2,2,1}, Note{1,2,3}, Note{0,0,0}};
+const Note snd_newWave[] = {Note{10,3,1}, Note{11,3,3}, Note{0,0,0}};
 #endif

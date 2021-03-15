@@ -20,16 +20,18 @@
 #include "ufo.h"
 #include"gametiny_font.h"
 #include "menus.h"
-#include "testing.h"
 #define DEBUG
 
 // 0 | 0 | PB5 | PB4 | PB3 | PB2 | PB1 | PB0
-#define SETUP_PINS() DDRB |= 0b00011010 // set PB1 as output (for the speaker), PB0 and PB2 as input for buttons, PB4 and PB3 as output for screens
+#define SETUP_PINS() DDRB |= 0b00010011 // set PB1 as output (for the speaker), PB0 and PB3 as input for buttons, PB4 and PB0 as output for screens
 
 #define SCREEN_WIDTH 128 // OLED display width,  in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
 #define TIME_PER_FRAME 32 // in ms
+
+#define PIN_SDA PB4
+#define PIN_SCL PB0
 
 
 void drawIntro() {
@@ -43,13 +45,15 @@ void drawIntro() {
     delay(25);
     CLEAR_SCREEN();
   }*/
-  ssd1306_drawBuffer(48, 48, 40, 32, gameTinyLogo);
+  ssd1306_drawBuffer(40, 10, 40, 32, gameTinyLogo);
   melody(snd_intro);
+  delay(1000);
   CLEAR_SCREEN();
 }
 
 void setup() {
-  ssd1306_128x64_i2c_init();
+  //ssd1306_128x64_i2c_init();
+  ssd1306_128x64_i2c_initEx(PIN_SCL,PIN_SDA, 0);
   ssd1306_setFixedFont(TinyFont4x6);
 
   SETUP_PINS();
@@ -67,7 +71,7 @@ void setup() {
 void loop() {
   unsigned long startLoopTime = millis();  // Save time to get 30 FPS
 
-// TODO  note(0, 0);
+  note(0, 0);
 
   updateInputs();
   playerUpdate();

@@ -4,26 +4,24 @@
 #include "debug.h"
 
 #define PIN_DPAD 7
-#define PIN_BUTTON_A PB0
+#define PIN_BUTTONS PB3
 
-#define IS_RIGHT_PAD_PRESSED (pinInputs.padPinValue >= 660) && (pinInputs.padPinValue <= 760)
-#define IS_DOWN_PAD_PRESSED (pinInputs.padPinValue >= 460) && (pinInputs.padPinValue <= 560)
-#define IS_LEFT_PAD_PRESSED (pinInputs.padPinValue >= 2) && (pinInputs.padPinValue <= 30)
-#define IS_UP_PAD_PRESSED (pinInputs.padPinValue >= 850) && (pinInputs.padPinValue <= 1020)
-#define IS_A_BUTTON_PRESSED pinInputs.buttonPinValue == 1
-#define IS_B_BUTTON_PRESSED (pinInputs.padPinValue >= 1021) && (pinInputs.padPinValue <= 1030)
+#define IS_RIGHT_PAD_PRESSED (padPinValue >= 70) && (padPinValue <= 112) // 71 and 111
+#define IS_DOWN_PAD_PRESSED (padPinValue >= 983) && (padPinValue <= 1024) // 984 and 1023
+#define IS_LEFT_PAD_PRESSED (padPinValue >= 512) && (padPinValue <= 515) // 513 and 514
+#define IS_UP_PAD_PRESSED (padPinValue >= 163) && (padPinValue <= 200) // 164 and 199
+#define IS_A_BUTTON_PRESSED (buttonPinValue >= 70) && (buttonPinValue <= 100) // 70 and 100
+#define IS_B_BUTTON_PRESSED (buttonPinValue >= 300) && (buttonPinValue <= 600) // random and 512
+#define IS_START_BUTTON_PRESSED (buttonPinValue >= 170) && (buttonPinValue <= 190) // random and 184
 
   //sei();                      // enable all interrupts
 
-static struct PinInputs {
-  uint_fast16_t padPinValue:15;
-  bool buttonPinValue:1;
-} pinInputs;
-
+uint_fast16_t padPinValue;
+uint_fast16_t buttonPinValue;
 
 void updateInputs() {
-  pinInputs.padPinValue = analogRead(PIN_DPAD); // analog read is actually very optimized for at tiny
-  pinInputs.buttonPinValue = PINB & 0b00000001; // read form pb0
+  padPinValue = analogRead(PIN_DPAD); // analog read is actually very optimized for at tiny
+  buttonPinValue = analogRead(PIN_BUTTONS);
 }
 
 #endif

@@ -7,20 +7,41 @@
 #include "invader.h"
 #include "shelters.h"
 #include "texts.h"
+#include "menus.h"
+#include "score.h"
 
 
 #define PLAYER_WIDTH 7
 #define PLAYER_HEIGHT 3
 #define START_POS_X 64 - PLAYER_WIDTH/2
 #define START_POS_Y 56
-#define PLAYER_SHOOT_COOLDOWN 600 //in ms
+#define PLAYER_SHOOT_COOLDOWN 680 //in ms
 #define PLAYER_SPEED 1 // pixel per frame
 
 static struct Player {
   SPRITE sprite;
   Bullet bullet;
-  uint_fast8_t hp;
+  uint_fast8_t hp = 3;
 } p;
+
+void gameOver() {
+  melody(snd_gameOver);
+  while(!eeprom_is_ready()) {}
+  uint_fast16_t oldHighScore = eeprom_read_word(HIGH_SCORE_EEPROM_ADDR);
+  bool isHighScore = false;
+  if (oldHighScore < score) {
+    while(!eeprom_is_ready()) {}
+    eeprom_write_word(HIGH_SCORE_EEPROM_ADDR, score);
+    isHighScore = true;
+  }
+  drawGameOver(score, isHighScore);
+  delay(5000);
+  while(!eeprom_is_ready()) {}
+  (( fn_t ) ( 0x0000 ))();
+     // display game over
+   // save score
+   // back to start
+}
 
 void displayPlayerLife() {
   load_text(TXT_LIVES_ID);
@@ -30,9 +51,8 @@ void displayPlayerLife() {
 }
 
 void init_player() {
-   p.sprite = ssd1306_createSprite(START_POS_X, START_POS_Y, sizeof(playerBMP),  playerBMP); 
+   p.sprite = ssd1306_createSprite(START_POS_X, START_POS_Y, sizeof(playerShot),  playerShot); 
    p.sprite.draw();
-   p.hp=3;
    p.bullet.directionnalSpeed= PLAYER_BULLET_SPEED;
    displayPlayerLife();
 }
@@ -64,8 +84,11 @@ static void playerShoot() {
       lastShootTime = millis();
       //p.sprite = ssd1306_createSprite(p.sprite.x, p.sprite.y, sizeof(playerBMP),  playerBMP);
       shoot(&p.bullet, p.sprite.x + 4, p.sprite.y);
-      // TODO note(7,4);
+      note(7,4);
       //cooldownOver = false;
+      updateScore(0);
+      displayPlayerLife();
+      playerDraw();
     }
   if (IS_B_BUTTON_PRESSED) {
     p.sprite.x = START_POS_X;
@@ -91,24 +114,15 @@ static bool processCollisionWithInvaders(Bullet *theBullet) {
    return false;
 }
 
-void playPlayerExplosionSound() {
-  
-  melody(snd_playerExplosion);
-}
-
-
 
 void playerLoosesHP() {
   --p.hp;
-  playPlayerExplosionSound();
-  delay(800);
-  if(p.hp == 0) {
-   // display game over
-   // save score
-   // back to start
+  melody(snd_playerExplosion);
+  if (p.hp<=0){
+    gameOver();
   } else {
     displayPlayerLife();
-    init_player();
+    p.sprite.x=START_POS_X;
   }
 }
 
@@ -137,7 +151,9 @@ void playerUpdate() {
   playerMove();
   playerShoot();
   bulletUpdate(&p.bullet);
-  
+  if(getLastRowWithAliveInvader() + invaderBrain.diveCounter >= 12) {
+    gameOver();
+  }
 }
 
 #endif

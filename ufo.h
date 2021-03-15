@@ -62,10 +62,12 @@ void updateUFO() {
     if(p.bullet.enabled) processCollisionWithUFO();
     if(UFO.x > 114) { // gone on screen limit
       killUFO();
+      note(1,2);
     } else {
       UFO.x += UFO_SPEED;
       UFO.eraseTrace();
       UFO.draw();
+      note(5,2);
     }  
   } 
   else if(timer >= ufoInfo.timeUntilNextUFO*30) {

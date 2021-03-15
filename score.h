@@ -8,12 +8,10 @@
 #define SCORE_UFO_WEAK 50
 #define SCORE_UFO_STRONG 300
 
-#include "texts.h";
-
-
+#include "texts.h"
+uint_fast16_t score = 0;
 
 void updateScore(uint_fast16_t toAdd) {
-  static uint_fast16_t score = 0;
   score += toAdd;
   load_text(TXT_SCORE_ID);
   ssd1306_printFixed_oldStyle(0, 0, str_buffer, STYLE_NORMAL);

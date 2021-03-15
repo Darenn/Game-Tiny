@@ -19,8 +19,9 @@
 #define INVADERS_ROW_COUNT 3 // How much rows on the invader matrix
 #define INVADERS_COUNT INVADERS_COLUMN_COUNT * INVADERS_ROW_COUNT // Total count of invaders
 
-#define INVADERS_STARTING_STRAFE_TIME 2750 //3000
-#define INVADERS_STRAFE_TIME_LOSS 75
+#define INVADERS_STARTING_STRAFE_TIME 1800 //3000
+#define INVADERS_STRAFE_TIME_LOSS_WAVE 200
+#define INVADERS_STRAFE_TIME_LOSS 40
 #define INVADER_STARTING_RIGHT_STRAFE_COUNT_LIMIT 19 // How much time invaders will strafe to the right at start.
 #define INVADER_STARTING_LEFT_STRAFE_COUNT_LIMIT 0 // How much time invaders will strafe to the left at start.
 
@@ -32,6 +33,7 @@
 
 #define STARTING_TIME_BETWEEN_SHOTS_MIN 30 * 1 // in frame
 #define STARTING_TIME_BETWEEN_SHOTS_MAX 30 * 3 // in frame
+#define TIME_LOSS_BETWEEN_SHOTS 10
 
 /*
    Find the most to the right alien alive to calculate how much more we should move to the right (in strafe move) (and same with the left).
@@ -50,6 +52,9 @@ uint_fast8_t invadersStates [INVADERS_COUNT / 8 + 1];
 static Bullet bulletFast;
 uint_fast8_t strafeCounterOld;
 uint_fast8_t diveCounterOld;
+static uint_fast16_t invaders_strafe_time = INVADERS_STARTING_STRAFE_TIME;
+
+static uint_fast16_t max_time_between_shots = STARTING_TIME_BETWEEN_SHOTS_MAX;
 
 static struct InvaderBrain {
   uint_fast8_t noteCounter: 3; // max7
@@ -85,8 +90,30 @@ inline static uint_fast8_t getPosY(uint_fast8_t idx, uint_fast8_t diveCounter = 
 
 typedef void ( *fn_t )( void );
 
+void newWave() {
+  melody(snd_newWave);
+  strafeCounter = 0;
+  deadInvaders = 0;
+  strafeCounterOld = 0;
+  diveCounterOld = 0;
+  invaderBrain.noteCounter = 4;
+  invaderBrain.invaderDirection = false;
+  invaderBrain.diveCounter = 0;
+  invaders_strafe_time -= INVADERS_STRAFE_TIME_LOSS_WAVE;
+  max_time_between_shots -= TIME_LOSS_BETWEEN_SHOTS;
+  if(max_time_between_shots < STARTING_TIME_BETWEEN_SHOTS_MIN) {
+    max_time_between_shots = STARTING_TIME_BETWEEN_SHOTS_MIN;
+  }
+  size_t i;
+  for(i = 0; i < INVADERS_COUNT; ++i)
+  {
+    CLEAR_BIT(invadersStates[i/8], i % 8);
+  }
+}
+
 static void killInvader(uint_fast8_t i) {
   setDead(i);
+  note(1,1);
   uint8_t score = 30;
   if (i >= INVADERS_COLUMN_COUNT) {
     score = 10;
@@ -98,8 +125,7 @@ static void killInvader(uint_fast8_t i) {
     // TODO call win screen
     // for now just reset
     // TODO note(0,0);
-    delay(1000);
-    (( fn_t ) ( 0x0000 ))();
+    newWave();
     /*do
       {
       wdt_enable(WDTO_15MS);
@@ -198,12 +224,17 @@ static inline void drawInvaders() {
   }
 }
 
+
+
 static void invade() {
   static unsigned long lastStrafeTime = 0;  // the last time we strafed in ms
-
-  if (millis() - lastStrafeTime > INVADERS_STARTING_STRAFE_TIME - deadInvaders * INVADERS_STRAFE_TIME_LOSS) {
+  signed long timeToWait = 20;
+  if (invaders_strafe_time - deadInvaders * INVADERS_STRAFE_TIME_LOSS >= 0 && invaders_strafe_time - deadInvaders * INVADERS_STRAFE_TIME_LOSS < 10000) {
+    timeToWait = invaders_strafe_time - deadInvaders * INVADERS_STRAFE_TIME_LOSS;
+  }
+  if (millis() - lastStrafeTime > invaders_strafe_time - deadInvaders * INVADERS_STRAFE_TIME_LOSS) {
     if (invaderBrain.noteCounter <= 0) invaderBrain.noteCounter = 4;
-    // TODO note (--invaderBrain.noteCounter, 3);
+    note(--invaderBrain.noteCounter, 3);
     lastStrafeTime = millis();
 #define ld_arrivedOnRight (!invaderBrain.invaderDirection) && (strafeCounter >= INVADER_RIGHT_STRAFE_COUNT_LIMIT)
 #define ld_arrivedOnLeft (invaderBrain.invaderDirection) && (strafeCounter <= INVADER_LEFT_STRAFE_COUNT_LIMIT)
@@ -236,13 +267,13 @@ uint_fast8_t getLastRowWithAliveInvaderOnColumn(uint_fast8_t col) {
 }
 
 static void invadersShoot() {
-  static uint_fast8_t timeUntilNextShot = GT_RANDOM_RANGE(STARTING_TIME_BETWEEN_SHOTS_MIN, STARTING_TIME_BETWEEN_SHOTS_MAX);
+  static uint_fast8_t timeUntilNextShot = GT_RANDOM_RANGE(STARTING_TIME_BETWEEN_SHOTS_MIN, max_time_between_shots);
   static uint_fast8_t shotTimer = 0;
 
   ++shotTimer;
   if (shotTimer >= timeUntilNextShot) {
     shotTimer = 0;
-    timeUntilNextShot = GT_RANDOM_RANGE(STARTING_TIME_BETWEEN_SHOTS_MIN, STARTING_TIME_BETWEEN_SHOTS_MAX);
+    timeUntilNextShot = GT_RANDOM_RANGE(STARTING_TIME_BETWEEN_SHOTS_MIN, max_time_between_shots);
     const uint_fast8_t col = GT_RANDOM_RANGE(getFirstColumnWithAliveInvader(), getLastColumnWithAliveInvader());
     const uint_fast8_t row = getLastRowWithAliveInvaderOnColumn(col);
     const uint_fast8_t index = getIndexByCoordinates(row, col);
