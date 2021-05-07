@@ -3,7 +3,7 @@
 #define PIN_SDA PB4
 #define PIN_SCL PB0
 
-#define LOGO_EEPROM_ADDR 0
+#define LOGO_EEPROM_ADDR 30
 #define HIGH_SCORE_EEPROM_ADDR 160
 
 const unsigned char gameTinyLogo [160] = {

@@ -2,9 +2,9 @@
      Attiny85 PINS
                     ____
      RESET(PB5)   -|_|  |- 3V
-     SCL (PB3)    -|    |- (PB2) PAD
+     BUTTONS (PB3)-|    |- (PB2) PAD
      SDA (PB4)    -|    |- (PB1) HP
-     GND          -|____|- (PB0) A
+     GND          -|____|- (PB0) SCL
 */
 
 #include "ssd1306.h"
@@ -23,7 +23,7 @@
 #define DEBUG
 
 // 0 | 0 | PB5 | PB4 | PB3 | PB2 | PB1 | PB0
-#define SETUP_PINS() DDRB |= 0b00010011 // set PB1 as output (for the speaker), PB0 and PB3 as input for buttons, PB4 and PB0 as output for screens
+#define SETUP_PINS() DDRB |= 0b00010011 // set PB1 as output (for the speaker), PB0 and PB2 as input for buttons, PB4 and PB0 as output for screens
 
 #define SCREEN_WIDTH 128 // OLED display width,  in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
